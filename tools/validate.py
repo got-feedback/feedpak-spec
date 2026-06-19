@@ -83,6 +83,15 @@ def safe_relpath(p: str) -> bool:
     return ".." not in parts and "" not in parts[:-1]
 
 
+def within_root(root: Path, target: Path) -> bool:
+    """True if `target`, with symlinks resolved, stays inside the package root.
+    Rejects symlinks (a file or directory, including manifest.yaml itself) that point
+    outside the pack — matching the spec's "reject paths that escape the package root" rule."""
+    root_real = root.resolve()
+    target_real = target.resolve()
+    return root_real == target_real or root_real in target_real.parents
+
+
 class Report:
     def __init__(self, label: str):
         self.label = label
@@ -123,12 +132,10 @@ def check_pointer_exists(root: Path, relpath: str, key: str, rep: Report) -> boo
     # Resolve symlinks and confirm the real target stays inside the package root.
     # A safe-looking relpath can still escape via a symlinked directory/file
     # (e.g. stems/ -> /etc); the spec requires rejecting paths that escape the root.
-    root_real = root.resolve()
-    target_real = (root / relpath).resolve()
-    if root_real != target_real and root_real not in target_real.parents:
+    if not within_root(root, root / relpath):
         rep.err(f"manifest '{key}' escapes the package root (symlink?): {relpath}")
         return False
-    if not target_real.is_file():
+    if not (root / relpath).resolve().is_file():
         rep.err(f"missing file referenced by manifest '{key}': {relpath}")
         return False
     return True
@@ -136,6 +143,9 @@ def check_pointer_exists(root: Path, relpath: str, key: str, rep: Report) -> boo
 
 def validate_dir(root: Path, rep: Report) -> None:
     manifest_path = root / "manifest.yaml"
+    if not within_root(root, manifest_path):
+        rep.err("manifest.yaml escapes the package root (symlink?)")
+        return
     if not manifest_path.is_file():
         rep.err("no manifest.yaml at package root")
         return
