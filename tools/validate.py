@@ -54,8 +54,10 @@ SIDE_FILE_SCHEMAS = {
     "vocal_pitch": "vocal-pitch.schema.json",
     "song_timeline": "song-timeline.schema.json",
     "drum_tab": "drum-tab.schema.json",
+    "vocal_pitch_contour": "vocal-pitch-contour.schema.json",
+    "keys": "keys.schema.json",
 }
-NON_JSON_POINTERS = ("cover", "preview", "vocal_pitch_contour")
+NON_JSON_POINTERS = ("cover", "preview")
 
 
 def load_schema(name: str) -> Draft202012Validator:
@@ -64,10 +66,11 @@ def load_schema(name: str) -> Draft202012Validator:
 
 
 def safe_relpath(p: str) -> bool:
-    """Mirror the spec's path rule: POSIX-relative, no leading slash / backslash / '..'."""
+    """Mirror the spec's path rule (§2.2): a POSIX relative path with no leading slash,
+    no backslash, no drive letter / colon, and no '..' segment."""
     if not isinstance(p, str) or not p:
         return False
-    if p.startswith("/") or "\\" in p:
+    if p.startswith("/") or "\\" in p or ":" in p:  # ':' rejects C:/foo, C:foo, and NTFS streams
         return False
     parts = p.split("/")
     return ".." not in parts and "" not in parts[:-1]
@@ -188,9 +191,11 @@ def resolve_and_validate(pack: Path) -> Report:
     elif pack.is_file() and zipfile.is_zipfile(pack):
         with tempfile.TemporaryDirectory() as tmp:
             with zipfile.ZipFile(pack) as zf:
-                # guard against zip-slip
+                # guard against zip-slip (incl. drive letters / colons, which can escape
+                # the extraction root on Windows)
                 for name in zf.namelist():
-                    if name.startswith("/") or ".." in Path(name).parts or "\\" in name:
+                    if (name.startswith("/") or ".." in Path(name).parts
+                            or "\\" in name or ":" in name):
                         rep.err(f"unsafe path inside archive: {name}")
                 if rep.ok:
                     zf.extractall(tmp)

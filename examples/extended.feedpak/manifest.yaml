@@ -26,6 +26,8 @@ stems:
 lyrics: lyrics.json
 lyrics_source: authored
 vocal_pitch: vocal_pitch.json
+vocal_pitch_contour: vocal_pitch_contour.json
 song_timeline: song_timeline.json
 drum_tab: drum_tab.json
+keys: keys.json
 cover: cover.png

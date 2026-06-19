@@ -48,8 +48,8 @@
     "relpath": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?!/)(?!.*\\\\)(?!.*(^|/)\\.\\.(/|$)).+$",
-      "description": "POSIX relative path inside the package: no leading slash, no backslash, no '..' segment."
+      "pattern": "^(?!/)(?!.*:)(?!.*\\\\)(?!.*(^|/)\\.\\.(/|$)).+$",
+      "description": "POSIX relative path inside the package: no leading slash, no backslash, no drive letter / colon, no '..' segment."
     },
     "arrangementEntry": {
       "type": "object",

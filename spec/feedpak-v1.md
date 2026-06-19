@@ -182,7 +182,9 @@ These are **per-file schema versions** and are **orthogonal** to `feedpak_versio
 - They are plain integers (`1`, `2`, …), not semver, and start at `1`.
 - They are bumped only when *that file's* entry shape changes incompatibly.
 - A Reader **MUST NOT** assume any relationship between a side-file's `version` and the
-  package's `feedpak_version`. Every new side-file **SHOULD** include `"version": 1`.
+  package's `feedpak_version`. Every new **object-shaped** side-file **SHOULD** include
+  `"version": 1`. `lyrics.json` is the one exception — it is a flat array retained for
+  backward compatibility and carries no `version` field (see [§7.1](#71-lyricsjson)).
 
 ### 4.4. Specification-document version
 
@@ -522,11 +524,18 @@ All three sub-keys are individually OPTIONAL.
 
 Each side-file is referenced from the manifest by a pointer key (the "manifest opt-in, file off
 to the side" pattern; see [§9.1](#91-the-golden-rule-manifest-opt-in-file-off-to-the-side)).
-Every new side-file **MUST** carry a top-level integer `version` (see [§4.3](#43-side-file-schema-versions)).
+Every side-file that is a JSON **object SHOULD** carry a top-level integer `version` (see
+[§4.3](#43-side-file-schema-versions)). The one exception is `lyrics.json`, which is a flat JSON
+array kept for backward compatibility: it carries no `version` field, and its origin and
+revision are tracked at the manifest level instead (`lyrics_source`, `lyric_transcription`).
 
 ### 7.1. `lyrics.json`
 
-Referenced by the manifest `lyrics` key. A flat JSON list of syllable objects:
+Referenced by the manifest `lyrics` key. A flat JSON list of syllable objects. Unlike the
+object-shaped side-files, `lyrics.json` carries **no** top-level `version` field — it is an
+array kept in this shape for backward compatibility, and its origin/revision is tracked at the
+manifest level (`lyrics_source`, `lyric_transcription`). This is the one documented exception to
+the side-file `version` guidance in [§4.3](#43-side-file-schema-versions) and [§9.3](#93-always-include-version).
 
 ```json
 [
@@ -830,8 +839,10 @@ implementations is required.
 
 ### 9.3. Always include `version`
 
-Every new side-file **SHOULD** carry `"version": 1`. It is free insurance: a later incompatible
-change becomes `version: 2`, and old consumers can branch or fall back gracefully.
+Every new **object-shaped** side-file **SHOULD** carry `"version": 1`. It is free insurance: a
+later incompatible change becomes `version: 2`, and old consumers can branch or fall back
+gracefully. (The legacy `lyrics.json` array is the lone exception — see
+[§7.1](#71-lyricsjson).)
 
 ### 9.4. Stay backward-compatible
 
