@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://got-feedback.github.io/feedback-feedpak-spec/schemas/song-timeline.schema.json",
+  "$comment": "SPDX-License-Identifier: MIT. feedpak song_timeline.json (song-wide beats/sections). See spec/feedpak-v1.md §7.4.",
+  "title": "feedpak song timeline",
+  "type": "object",
+  "required": ["version"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "beats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["time", "measure"],
+        "additionalProperties": true,
+        "properties": {
+          "time": { "type": "number" },
+          "measure": { "type": "integer" }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "time"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "number": { "type": "integer" },
+          "time": { "type": "number" }
+        }
+      }
+    }
+  }
+}

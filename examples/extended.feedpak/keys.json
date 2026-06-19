@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "events": [
+    {"t": 0.0, "key": "Em", "scale": "natural_minor"},
+    {"t": 2.0, "key": "G", "scale": "major"}
+  ]
+}

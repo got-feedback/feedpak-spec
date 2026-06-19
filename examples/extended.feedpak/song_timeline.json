@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "beats": [
+    {"time": 0.0, "measure": 1},
+    {"time": 0.5, "measure": -1},
+    {"time": 1.0, "measure": -1},
+    {"time": 1.5, "measure": -1},
+    {"time": 2.0, "measure": 2},
+    {"time": 2.5, "measure": -1},
+    {"time": 3.0, "measure": -1},
+    {"time": 3.5, "measure": -1}
+  ],
+  "sections": [
+    {"name": "intro", "number": 1, "time": 0.0},
+    {"name": "verse", "number": 1, "time": 2.0}
+  ]
+}

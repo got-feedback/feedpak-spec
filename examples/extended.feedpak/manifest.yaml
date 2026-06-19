@@ -1,0 +1,33 @@
+# Extended feedpak exercising optional side-files: lyrics, vocal pitch,
+# song timeline, and a drum tab. See spec/feedpak-v1.md §5 and §7.
+# SPDX-License-Identifier: MIT
+feedpak_version: "1.0.0"
+title: "Extended Demo"
+artist: "Example Artist"
+album: "Spec Examples"
+year: 2026
+duration: 4.0
+arrangements:
+  - id: lead
+    name: Lead
+    file: arrangements/lead.json
+    tuning: [0, 0, 0, 0, 0, 0]
+    capo: 0
+    centOffset: 0.0
+  - id: bass
+    name: Bass
+    file: arrangements/bass.json
+    tuning: [0, 0, 0, 0]
+    capo: 0
+stems:
+  - id: full
+    file: stems/full.ogg
+    default: true
+lyrics: lyrics.json
+lyrics_source: authored
+vocal_pitch: vocal_pitch.json
+vocal_pitch_contour: vocal_pitch_contour.json
+song_timeline: song_timeline.json
+drum_tab: drum_tab.json
+keys: keys.json
+cover: cover.png

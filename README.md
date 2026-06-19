@@ -1,2 +1,87 @@
-# feedback-feedpak-spec
-Official file specification for the feedpakk file format
+# feedpak format specification
+
+The official, open specification for the **feedpak** file format — an open,
+hand-editable package format for interactive music notation: guitar/bass tab, standard
+notation, drum tabs, lyrics, vocal pitch, beats, sections, and the audio stems that go
+with them. One `.feedpak` holds all the authored data for a single song.
+
+- 📖 **Read the spec:** [`spec/feedpak-v1.md`](spec/feedpak-v1.md)
+- 🧩 **Machine-readable schemas:** [`schemas/`](schemas/) (JSON Schema, Draft 2020-12)
+- 📦 **Worked examples:** [`examples/`](examples/)
+- ✅ **Reference validator:** [`tools/validate.py`](tools/validate.py)
+
+| | |
+|---|---|
+| **Specification version** | 1.0.0 |
+| **Format major version** | 1 |
+| **Status** | Draft |
+| **Canonical extension** | `.feedpak` |
+
+## What a feedpak looks like
+
+A feedpak exists in two interchangeable forms — a **directory** (`my-song.feedpak/`) for
+authoring and hand-editing, and a **zip archive** (`my-song.feedpak`) for distribution.
+Both hold the same files:
+
+```
+my-song.feedpak/
+├── manifest.yaml             # the index: metadata + pointers to every other file
+├── arrangements/
+│   └── lead.json             # note/chord data per arrangement
+├── stems/
+│   └── full.ogg              # audio
+├── lyrics.json               # optional side-files, each opted-in from the manifest
+└── cover.jpg
+```
+
+The design rests on three ideas, spelled out in the spec:
+
+1. **The manifest is the index.** Nothing is discovered by scanning filenames — every file
+   is referenced from `manifest.yaml`.
+2. **Plain-text first.** YAML for the hand-edited manifest, JSON for data. Audio is OGG.
+3. **Extensible without breaking readers.** New data is a new side-file plus a new manifest
+   key; older readers ignore what they don't recognise.
+
+## Versioning
+
+feedpak has versioning built in, on three independent axes (see
+[spec §4](spec/feedpak-v1.md#4-versioning)):
+
+- **Format version** — `feedpak_version` in the manifest, a semver string
+  (`"1.0.0"`), with a documented MAJOR/MINOR/PATCH compatibility policy.
+- **Side-file schema versions** — each side-file's own integer `version`, independent of
+  the format version.
+- **Specification-document version** — this published document, frozen per release with a
+  git tag.
+
+## Validate a pack
+
+```bash
+pip install pyyaml jsonschema
+python tools/validate.py path/to/song.feedpak      # zip or directory form
+python tools/validate.py examples/minimal.feedpak
+```
+
+The validator is also a minimal reference reader: it resolves a pack through its manifest,
+checks every pointer, and validates each file against the schemas in [`schemas/`](schemas/).
+
+## License
+
+This repository is dual-licensed so the format stays maximally open:
+
+- **Specification prose and documentation** (`spec/`, `README.md`, `*.md`) are released
+  into the public domain under [**CC0 1.0 Universal**](LICENSE). You may implement,
+  excerpt, or republish the spec with no restrictions and no obligation to anyone.
+- **Schemas, examples, and reference code** (`schemas/`, `examples/`, `tools/`) are
+  licensed under the [**MIT License**](LICENSE-CODE).
+
+Attribution is **not required**, but if you build on feedpak a link back to this
+repository is appreciated. Suggested citation: *"feedpak format specification, version
+1.0.0, https://github.com/got-feedback/feedback-feedpak-spec"*.
+
+## Contributing
+
+Proposals to evolve the format are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+enhancement-proposal process and the DCO sign-off requirement, and
+[GOVERNANCE.md](GOVERNANCE.md) for how versions are decided and cut. Changes are tracked in
+[CHANGELOG.md](CHANGELOG.md).
