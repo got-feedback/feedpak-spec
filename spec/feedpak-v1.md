@@ -898,4 +898,4 @@ the sole normative artifact, and the byte-for-byte layout of any wire protocol i
 - [Semantic Versioning 2.0.0](https://semver.org/).
 - [YAML 1.2.2](https://yaml.org/spec/1.2.2/).
 - [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema).
-- [General MIDI percussion key map](https://www.midi.org/specifications) (drum piece-id GM mapping).
+- [General MIDI percussion key map](https://en.wikipedia.org/wiki/General_MIDI#Percussion) (drum piece-id GM mapping).
