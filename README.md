@@ -6,6 +6,7 @@ notation, drum tabs, lyrics, vocal pitch, beats, sections, and the audio stems t
 with them. One `.feedpak` holds all the authored data for a single song.
 
 - 📖 **Read the spec:** [`spec/feedpak-v1.md`](spec/feedpak-v1.md)
+- ✏️ **Hand-editing guide:** [`spec/hand-editing.md`](spec/hand-editing.md) — practical "edit your own pack" companion
 - 🧩 **Machine-readable schemas:** [`schemas/`](schemas/) (JSON Schema, Draft 2020-12)
 - 📦 **Worked examples:** [`examples/`](examples/)
 - ✅ **Reference validator:** [`tools/validate.py`](tools/validate.py)
