@@ -10,6 +10,12 @@ relate.
 
 ## [Unreleased]
 
+### Added
+- [`spec/hand-editing.md`](spec/hand-editing.md) — a practical, vendor-neutral hand-editing
+  guide (record/replace stems, edit metadata/cover/lyrics/tuning, re-zip for distribution),
+  adapted from the feedback project's user guide with application-specifics removed. Linked
+  from the README.
+
 ## [1.0.0] - 2026-06-19
 
 Initial public release of the feedpak format specification.
