@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Questions & discussion
-    url: https://github.com/got-feedback/feedback-feedpak-spec/discussions
+    url: https://github.com/got-feedback/feedpak-spec/discussions
     about: Not sure if it's a bug or a proposal? Ask here first.

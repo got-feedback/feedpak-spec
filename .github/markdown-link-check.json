@@ -1,6 +1,6 @@
 {
   "ignorePatterns": [
-    { "pattern": "^https://github.com/got-feedback/feedback-feedpak-spec/(releases|compare|issues)" },
+    { "pattern": "^https://github.com/got-feedback/feedpak-spec/(releases|compare|issues)" },
     { "pattern": "^https://got-feedback.github.io/" },
     { "pattern": "^(feedpak-v1|hand-editing|changelog)\\.md" },
     { "pattern": "^schemas/[a-z0-9-]+\\.schema\\.json$" }

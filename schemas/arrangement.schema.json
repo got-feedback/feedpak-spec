@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://got-feedback.github.io/feedback-feedpak-spec/schemas/arrangement.schema.json",
+  "$id": "https://got-feedback.github.io/feedpak-spec/schemas/arrangement.schema.json",
   "$comment": "SPDX-License-Identifier: MIT. feedpak arrangement JSON (wire format). See spec/feedpak-v1.md §6.",
   "title": "feedpak arrangement",
   "type": "object",

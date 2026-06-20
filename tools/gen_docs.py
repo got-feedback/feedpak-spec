@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
-BLOB = "https://github.com/got-feedback/feedback-feedpak-spec/blob/main"
+BLOB = "https://github.com/got-feedback/feedpak-spec/blob/main"
 
 # Repo-relative links -> site-relative (or absolute GitHub) equivalents. Order matters:
 # longer prefixes (LICENSE-CODE) before the shorter ones (LICENSE).

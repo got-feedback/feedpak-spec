@@ -3,7 +3,7 @@ name: pages
 # Builds the documentation site with MkDocs Material (light/dark themed) and deploys
 # it to GitHub Pages. The JSON Schemas are copied into the site verbatim by
 # tools/gen_docs.py, so the schema `$id` / `$ref` URLs
-# (https://got-feedback.github.io/feedback-feedpak-spec/schemas/*.json) keep resolving.
+# (https://got-feedback.github.io/feedpak-spec/schemas/*.json) keep resolving.
 # The reference validator loads schemas locally and does NOT depend on this.
 #
 # One-time setup by a maintainer: Settings → Pages → Build and deployment →

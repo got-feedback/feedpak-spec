@@ -5,7 +5,7 @@ hand-editable package format for interactive music notation: guitar/bass tab, st
 notation, drum tabs, lyrics, vocal pitch, beats, sections, and the audio stems that go
 with them. One `.feedpak` holds all the authored data for a single song.
 
-- 🌐 **Rendered site & hosted schemas:** <https://got-feedback.github.io/feedback-feedpak-spec/>
+- 🌐 **Rendered site & hosted schemas:** <https://got-feedback.github.io/feedpak-spec/>
 - 📖 **Read the spec:** [`spec/feedpak-v1.md`](spec/feedpak-v1.md)
 - ✏️ **Hand-editing guide:** [`spec/hand-editing.md`](spec/hand-editing.md) — practical "edit your own pack" companion
 - 🧩 **Machine-readable schemas:** [`schemas/`](schemas/) (JSON Schema, Draft 2020-12)
@@ -94,7 +94,7 @@ This repository is dual-licensed so the format stays maximally open:
 
 Attribution is **not required**, but if you build on feedpak a link back to this
 repository is appreciated. Suggested citation: *"feedpak format specification, version
-1.2.0, https://github.com/got-feedback/feedback-feedpak-spec"*.
+1.2.0, https://github.com/got-feedback/feedpak-spec"*.
 
 ## Contributing
 

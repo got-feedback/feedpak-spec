@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://got-feedback.github.io/feedback-feedpak-spec/schemas/manifest.schema.json",
+  "$id": "https://got-feedback.github.io/feedpak-spec/schemas/manifest.schema.json",
   "$comment": "SPDX-License-Identifier: MIT. feedpak manifest.yaml (validated as JSON). See spec/feedpak-v1.md §5.",
   "title": "feedpak manifest",
   "type": "object",

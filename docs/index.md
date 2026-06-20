@@ -34,6 +34,6 @@ JSON Schema (Draft 2020-12). These are the hosted, resolvable counterparts of ea
 ## License
 
 Specification prose is dedicated to the public domain under
-[CC0 1.0](https://github.com/got-feedback/feedback-feedpak-spec/blob/main/LICENSE); the schemas,
+[CC0 1.0](https://github.com/got-feedback/feedpak-spec/blob/main/LICENSE); the schemas,
 examples, and reference tooling are
-[MIT](https://github.com/got-feedback/feedback-feedpak-spec/blob/main/LICENSE-CODE).
+[MIT](https://github.com/got-feedback/feedpak-spec/blob/main/LICENSE-CODE).

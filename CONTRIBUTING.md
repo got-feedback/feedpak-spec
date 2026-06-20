@@ -65,7 +65,7 @@ design and is how every extension so far has shipped.
 ## Workflow
 
 - Never push directly to `main`. Branch, then open a PR against
-  `got-feedback/feedback-feedpak-spec:main`.
+  `got-feedback/feedpak-spec:main`.
 - CI must pass: the reference validator runs over `examples/`, and the schemas are checked for
   validity. Run it locally first:
   ```bash

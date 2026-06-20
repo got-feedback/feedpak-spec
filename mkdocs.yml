@@ -1,10 +1,10 @@
 site_name: feedpak format specification
-site_url: https://got-feedback.github.io/feedback-feedpak-spec/
+site_url: https://got-feedback.github.io/feedpak-spec/
 site_description: >-
   An open, hand-editable package format for interactive music notation — tab,
   notation, drums, lyrics, vocal pitch, beats, sections, and audio stems.
-repo_url: https://github.com/got-feedback/feedback-feedpak-spec
-repo_name: got-feedback/feedback-feedpak-spec
+repo_url: https://github.com/got-feedback/feedpak-spec
+repo_name: got-feedback/feedpak-spec
 
 docs_dir: docs
 # Generated pages (docs/feedpak-v1.md, docs/changelog.md, docs/schemas/) are not in

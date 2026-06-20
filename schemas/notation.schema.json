@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://got-feedback.github.io/feedback-feedpak-spec/schemas/notation.schema.json",
+  "$id": "https://got-feedback.github.io/feedpak-spec/schemas/notation.schema.json",
   "$comment": "SPDX-License-Identifier: MIT. feedpak notation_<id>.json (standard notation). See spec/feedpak-v1.md §7.6.",
   "title": "feedpak notation",
   "type": "object",
