@@ -16,6 +16,10 @@
     "artist": { "type": "string" },
     "album": { "type": "string" },
     "year": { "type": "integer" },
+    "authors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/author" }
+    },
     "duration": { "type": "number", "minimum": 0 },
     "arrangements": {
       "type": "array",
@@ -97,6 +101,17 @@
         "engine": { "type": "string" },
         "model": { "type": "string" },
         "version": { "$ref": "#/$defs/semver" }
+      }
+    },
+    "author": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string" },
+        "email": { "type": "string" },
+        "url": { "type": "string" }
       }
     }
   }

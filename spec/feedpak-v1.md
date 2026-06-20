@@ -7,10 +7,10 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.0.0
+- **Specification version:** 1.1.0
 - **Format major version:** 1
 - **Status:** Draft
-- **Date:** 2026-06-19
+- **Date:** 2026-06-20
 - **Editors:** The feedpak authors
 - **License:** [CC0 1.0 Universal](../LICENSE) (this document)
 - **Machine-readable schemas:** [`schemas/`](../schemas/) (MIT)
@@ -140,11 +140,12 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.0.0"
+feedpak_version: "1.1.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.0.0"`.
+  `feedpak_version: "1.1.0"`. (Version 1.1.0 added the optional [`authors`](#54-authors) list
+  additively; an older 1.0.0 Reader simply ignores it.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
@@ -230,6 +231,7 @@ stems:
 | `artist` | string | **yes** | Artist name. |
 | `album` | string | no | Album. |
 | `year` | int | no | Release year. |
+| `authors` | list | no | Human contributors who authored or edited this feedpak (see [§5.4](#54-authors)). Distinct from `artist`. |
 | `duration` | number | **yes** | Song length in seconds. |
 | `arrangements` | list | **yes** | Playable arrangements (see [§5.2](#52-arrangements)). MUST be non-empty. A notation-only entry still counts as an arrangement — it may omit `file` (see §5.2), but it is not an exception to the non-empty rule. |
 | `stems` | list | **yes** | Audio stems (see [§5.3](#53-stems)). MUST be non-empty. |
@@ -325,6 +327,34 @@ stem_separation:
 Omitted for single-stem packs and for hand-recorded or hand-edited stems. The three fields
 together form a natural cache key: a consumer regenerating stems can treat any change among
 them as a cache miss.
+
+### 5.4. `authors[]`
+
+An OPTIONAL top-level `authors` list credits the **people who authored or edited this feedpak** —
+whoever transcribed the chart, arranged it, mixed the stems, or hand-corrected the data. This is
+**distinct from `artist`**, which names the recording artist / musician who performed the song;
+both MAY be present.
+
+```yaml
+authors:
+  - name: Jane Smith            # display name or handle
+    role: transcriber
+    email: jane@example.com
+    url: https://janesmith.dev
+  - name: Bob Lee
+    role: editor
+```
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `name` | string | — | **REQUIRED.** Contributor's name or handle. |
+| `role` | string | — | OPTIONAL. What they contributed. The value is free-form and a Reader **MUST** accept any string; the RECOMMENDED vocabulary is `transcriber`, `arranger`, `charter`, `editor`, `mixer`, `engineer`, and `proofreader`. |
+| `email` | string | — | OPTIONAL. Contact email. |
+| `url` | string | — | OPTIONAL. Profile or homepage URL. |
+
+When an entry omits `role`, a consumer **SHOULD** treat the contribution as unspecified rather
+than infer one. The `authors` key is OPTIONAL: a pack with no contributor metadata simply omits
+it, and a Reader that does not understand it ignores it per [§1.2](#12-roles).
 
 ---
 
