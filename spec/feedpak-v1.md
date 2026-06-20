@@ -7,7 +7,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.2.0
+- **Specification version:** 1.3.0
 - **Format major version:** 1
 - **Status:** Draft
 - **Date:** 2026-06-20
@@ -140,15 +140,16 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.2.0"
+feedpak_version: "1.3.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.2.0"`. (Version 1.1.0 added the optional [`authors`](#54-authors) list;
-  1.2.0 added the optional song-level [`tempos`](#74-song_timelinejson) and
-  [`time_signatures`](#74-song_timelinejson) plus a per-arrangement
-  [`tempos`](#610-per-arrangement-tempo-optional) override. All are additive; an older Reader
-  simply ignores what it does not recognise.)
+  `feedpak_version: "1.3.0"`. (The optional fields added since 1.0.0 —
+  [`authors`](#54-authors) in 1.1.0, and the song-level [`tempos`](#74-song_timelinejson) /
+  [`time_signatures`](#74-song_timelinejson) plus the per-arrangement
+  [`tempos`](#610-per-arrangement-tempo-optional) override in 1.2.0 — are all additive; 1.3.0
+  itself adds no on-disk field, so an older Reader simply ignores what it does not recognise and
+  a 1.2.0 pack is also a valid 1.3.0 pack.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
