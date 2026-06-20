@@ -1,0 +1,7 @@
+# Development / CI dependencies for the feedpak spec repo.
+# Runtime tools (the reference validator) need only pyyaml + jsonschema;
+# pytest + ruff are for the test and lint jobs.
+pyyaml
+jsonschema
+pytest
+ruff

@@ -1,0 +1,36 @@
+name: release
+
+# Cuts a GitHub Release when a version tag (v1.2.0, v2.0.0, …) is pushed.
+# Release notes are sliced from the matching CHANGELOG.md section so the tag,
+# the changelog, and the release never drift. Tagging is manual and remains the
+# authoritative "freeze a version" action described in spec §4.4 / GOVERNANCE.md.
+#
+#   git tag v1.2.0 && git push origin v1.2.0
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Extract changelog section for this tag
+        run: python tools/changelog_extract.py "${GITHUB_REF_NAME}" > RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file RELEASE_NOTES.md

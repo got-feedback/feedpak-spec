@@ -66,6 +66,19 @@ python tools/validate.py examples/minimal.feedpak
 The validator is also a minimal reference reader: it resolves a pack through its manifest,
 checks every pointer, and validates each file against the schemas in [`schemas/`](schemas/).
 
+## Development
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest -q          # unit + end-to-end tests for the validator
+python -m ruff check tools/ tests/
+```
+
+CI (`.github/workflows/validate.yml`) runs the schema meta-check, validates the example packs
+(directory and zip form), runs the tests across Python 3.10–3.13, and lints. The schemas are
+published to GitHub Pages on every push to `main`, and pushing a `vX.Y.Z` tag cuts a GitHub
+Release from the matching `CHANGELOG.md` section.
+
 ## License
 
 This repository is dual-licensed so the format stays maximally open:

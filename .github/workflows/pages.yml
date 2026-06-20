@@ -1,0 +1,65 @@
+name: pages
+
+# Publishes the JSON Schemas (and a small index) to GitHub Pages so the
+# schema `$id` / `$ref` URLs — https://got-feedback.github.io/feedback-feedpak-spec/schemas/*.json
+# — actually resolve for external tooling. The reference validator loads schemas
+# locally and does NOT depend on this; Pages is purely for published resolution.
+#
+# One-time setup by a maintainer: Settings → Pages → Build and deployment →
+# Source: "GitHub Actions". Until that is set, the deploy step will fail.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/schemas _site/examples
+          cp schemas/*.json _site/schemas/
+          cp -r examples/. _site/examples/
+          cp spec/*.md _site/
+          cp README.md CHANGELOG.md _site/
+          {
+            echo '<!doctype html><meta charset="utf-8"><title>feedpak format specification</title>'
+            echo '<h1>feedpak format specification</h1>'
+            echo '<p>Open, hand-editable package format for interactive music notation.</p>'
+            echo '<h2>JSON Schemas (Draft 2020-12)</h2><ul>'
+            for f in schemas/*.json; do
+              n="$(basename "$f")"
+              echo "<li><a href=\"schemas/$n\">$n</a></li>"
+            done
+            echo '</ul><h2>Documents</h2><ul>'
+            echo '<li><a href="feedpak-v1.md">Specification (feedpak-v1.md)</a></li>'
+            echo '<li><a href="hand-editing.md">Hand-editing guide</a></li>'
+            echo '<li><a href="CHANGELOG.md">Changelog</a></li>'
+            echo '</ul>'
+          } > _site/index.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

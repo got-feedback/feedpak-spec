@@ -44,7 +44,7 @@ SCHEMA_DIR = REPO_ROOT / "schemas"
 SUPPORTED_MAJOR = 1
 
 
-def _semver_re() -> "re.Pattern[str]":
+def _semver_re() -> re.Pattern[str]:
     """Use the manifest schema as the single source of truth for the semver pattern, so the
     validator and the schema can never disagree (e.g. on rejecting `1.0.0-01`)."""
     with open(SCHEMA_DIR / "manifest.schema.json", encoding="utf-8") as fh:

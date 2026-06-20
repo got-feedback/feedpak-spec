@@ -1,0 +1,187 @@
+# SPDX-License-Identifier: MIT
+"""Unit + end-to-end tests for the feedpak reference validator (tools/validate.py).
+
+These exercise the validator's real surface: path-safety, the semver gate, schema
+validation of whole packs (directory and zip form), and the zip-slip guard. They also
+re-validate the committed example packs so the examples can never silently rot.
+
+Run: python -m pytest -q
+"""
+from __future__ import annotations
+
+import json
+import sys
+import zipfile
+from pathlib import Path
+
+import pytest
+import yaml
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+
+import validate  # noqa: E402  (path is set up just above)
+
+
+# --------------------------------------------------------------------------- #
+# Unit: safe_relpath (spec §2.2 path rule)
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize("p", ["a.json", "arrangements/lead.json", "stems/full.ogg"])
+def test_safe_relpath_accepts_clean_relative_paths(p):
+    assert validate.safe_relpath(p)
+
+
+@pytest.mark.parametrize(
+    "p",
+    [
+        "/abs/path",      # leading slash
+        "../escape",      # parent segment
+        "a/../b",         # interior parent segment
+        "C:/drive",       # drive letter / colon
+        "a\\b",           # backslash
+        "a//b",           # empty segment
+        "",               # empty
+        ":stream",        # colon (NTFS stream)
+    ],
+)
+def test_safe_relpath_rejects_unsafe_paths(p):
+    assert not validate.safe_relpath(p)
+
+
+# --------------------------------------------------------------------------- #
+# Unit: semver gate (shared with the manifest schema)
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize("v", ["1.0.0", "1.2.0", "10.20.30", "1.0.0-rc.1", "2.0.0+build.5"])
+def test_semver_accepts_valid(v):
+    assert validate.SEMVER_RE.match(v)
+
+
+@pytest.mark.parametrize("v", ["1.0", "x", "1.0.0-01", "01.0.0", "1.0.0.0", ""])
+def test_semver_rejects_invalid(v):
+    assert not validate.SEMVER_RE.match(v)
+
+
+# --------------------------------------------------------------------------- #
+# Helpers to build packs on the fly
+# --------------------------------------------------------------------------- #
+def _base_manifest() -> dict:
+    return {
+        "feedpak_version": "1.2.0",
+        "title": "Test",
+        "artist": "Tester",
+        "duration": 1.0,
+        "arrangements": [{"id": "lead", "file": "arrangements/lead.json"}],
+        "stems": [{"id": "full", "file": "stems/full.ogg", "default": True}],
+    }
+
+
+def _make_pack(root: Path, manifest: dict, *, lead: dict | None = None,
+               extra: dict[str, str] | None = None) -> Path:
+    (root / "arrangements").mkdir(parents=True, exist_ok=True)
+    (root / "stems").mkdir(parents=True, exist_ok=True)
+    (root / "arrangements" / "lead.json").write_text(
+        json.dumps(lead if lead is not None else {"notes": [{"t": 0.0, "s": 0, "f": 0}]}),
+        encoding="utf-8",
+    )
+    (root / "stems" / "full.ogg").write_bytes(b"OggS\x00fake")
+    for rel, content in (extra or {}).items():
+        target = root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+    (root / "manifest.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+    return root
+
+
+# --------------------------------------------------------------------------- #
+# End-to-end: directory form
+# --------------------------------------------------------------------------- #
+def test_minimal_built_pack_passes(tmp_path):
+    pack = _make_pack(tmp_path / "ok.feedpak", _base_manifest())
+    assert validate.resolve_and_validate(pack).ok
+
+
+def test_missing_required_field_fails(tmp_path):
+    m = _base_manifest()
+    del m["duration"]
+    pack = _make_pack(tmp_path / "bad.feedpak", m)
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("duration" in e for e in rep.errors)
+
+
+def test_unsafe_pointer_fails(tmp_path):
+    m = _base_manifest()
+    m["lyrics"] = "../escape.json"
+    pack = _make_pack(tmp_path / "bad.feedpak", m)
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("lyrics" in e for e in rep.errors)
+
+
+def test_missing_pointer_target_fails(tmp_path):
+    m = _base_manifest()
+    m["lyrics"] = "lyrics.json"  # never written
+    pack = _make_pack(tmp_path / "bad.feedpak", m)
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("lyrics" in e and "missing" in e for e in rep.errors)
+
+
+def test_empty_arrangement_tempos_fails(tmp_path):
+    # spec §6.10: omit the key entirely; an empty array is non-conformant.
+    pack = _make_pack(
+        tmp_path / "bad.feedpak",
+        _base_manifest(),
+        lead={"notes": [{"t": 0.0, "s": 0, "f": 0}], "tempos": []},
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("tempos" in e for e in rep.errors)
+
+
+def test_tempo_event_missing_bpm_fails(tmp_path):
+    m = _base_manifest()
+    m["song_timeline"] = "song_timeline.json"
+    bad_timeline = json.dumps({"version": 1, "tempos": [{"time": 0.0}]})
+    pack = _make_pack(
+        tmp_path / "bad.feedpak", m, extra={"song_timeline.json": bad_timeline}
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("bpm" in e for e in rep.errors)
+
+
+# --------------------------------------------------------------------------- #
+# End-to-end: zip form + zip-slip guard
+# --------------------------------------------------------------------------- #
+def _zip_dir(src: Path, dest: Path, *, extra_arcname: str | None = None) -> Path:
+    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in src.rglob("*"):
+            if f.is_file():
+                zf.write(f, f.relative_to(src).as_posix())
+        if extra_arcname is not None:
+            zf.writestr(extra_arcname, "malicious")
+    return dest
+
+
+def test_zip_form_valid_pack_passes(tmp_path):
+    pack = _make_pack(tmp_path / "ok.feedpak", _base_manifest())
+    z = _zip_dir(pack, tmp_path / "ok.feedpak.zip")
+    assert validate.resolve_and_validate(z).ok
+
+
+def test_zip_slip_entry_rejected(tmp_path):
+    pack = _make_pack(tmp_path / "ok.feedpak", _base_manifest())
+    z = _zip_dir(pack, tmp_path / "evil.zip", extra_arcname="../evil.txt")
+    rep = validate.resolve_and_validate(z)
+    assert not rep.ok
+    assert any("unsafe path inside archive" in e for e in rep.errors)
+
+
+# --------------------------------------------------------------------------- #
+# Regression: the committed examples must always validate
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize("name", ["minimal.feedpak", "extended.feedpak"])
+def test_committed_examples_validate(name):
+    rep = validate.resolve_and_validate(ROOT / "examples" / name)
+    assert rep.ok, rep.errors
