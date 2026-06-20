@@ -18,6 +18,12 @@ on:
 permissions:
   contents: write
 
+# Serialize release runs so two overlapping pushes can't both pass the
+# "release exists?" check and then race on `gh release create`.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
