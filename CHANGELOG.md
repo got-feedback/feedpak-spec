@@ -10,6 +10,13 @@ relate.
 
 ## [Unreleased]
 
+### Fixed
+- §5.2 `tuning`: corrected the accepted-length range from "4–7 (4 = bass)" to **4–8**
+  (4–6 = bass, 6–8 = extended-range guitar). 6-string bass and 7/8-string guitar were
+  already permitted by the schema (`tuning` has no `maxItems`, note `s` has no maximum)
+  and by the "Readers MUST NOT hard-code length 6" rule, but the prose under-stated the
+  upper bound. Editorial clarification only — no on-disk format change.
+
 ## [1.3.0] - 2026-06-20
 
 Tooling, docs, and example release — no on-disk format change (a 1.2.0 pack is also a valid

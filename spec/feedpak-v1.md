@@ -274,7 +274,7 @@ arrangements:
 | `id` | string | — | **REQUIRED.** Stable, filesystem-safe, lowercase identifier; used in filenames and referenced by consumers. |
 | `name` | string | `id` | Display name. |
 | `file` | string (path) | — | Path to the arrangement JSON (see [§6](#6-arrangement-json)). MAY be omitted only when `notation` is present (see below). |
-| `tuning` | int[] | `[0,0,0,0,0,0]` | Semitone offsets from standard `E2 A2 D2 G3 B3 E4`. Six elements is the standard convention; 4–7 are accepted (4 = bass). Readers **MUST NOT** hard-code length 6. |
+| `tuning` | int[] | `[0,0,0,0,0,0]` | Semitone offsets from standard `E2 A2 D2 G3 B3 E4`. Six elements is the standard 6-string-guitar convention; lengths **4–8** are accepted (4–6 = bass, 6–8 = extended-range guitar; length 6 is shared). Readers **MUST NOT** hard-code length 6. |
 | `capo` | int | `0` | Capo fret. |
 | `centOffset` | number | `0.0` | Pitch-shift in cents. Common values: `-1200.0` (one octave down for extended-range bass), small non-zero values for non-A440 reference pitch (e.g. A443 ≈ `+11.8`). |
 | `type` | string | — | OPTIONAL instrument hint (`guitar`, `bass`, `piano`, `violin`, …). |
