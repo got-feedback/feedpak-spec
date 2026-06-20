@@ -74,6 +74,9 @@ jobs:
       - name: Lint reference tooling and tests
         run: python -m ruff check tools/ tests/
 
+      - name: Check spec / README / CHANGELOG versions agree
+        run: python tools/check_versions.py
+
   docs:
     runs-on: ubuntu-latest
     steps:

@@ -1,18 +1,28 @@
 name: release
 
-# Cuts a GitHub Release when a version tag (v1.2.0, v2.0.0, …) is pushed.
-# Release notes are sliced from the matching CHANGELOG.md section so the tag,
-# the changelog, and the release never drift. Tagging is manual and remains the
-# authoritative "freeze a version" action described in spec §4.4 / GOVERNANCE.md.
+# Release-on-merge. Whenever main advances, this cuts a GitHub Release for the
+# newest released version in CHANGELOG.md — but only if that release does not
+# already exist, so it is safe to run on every push. A PR that bumps the version
+# (moving `[Unreleased]` to a dated `## [X.Y.Z]` heading + the spec/README bumps the
+# version-consistency check enforces) therefore publishes a Release automatically
+# once it merges. `gh release create --target` also creates the `vX.Y.Z` tag.
 #
-#   git tag v1.2.0 && git push origin v1.2.0
+# This replaces the previous tag-triggered flow so a reviewed, merged version bump
+# can never silently skip its release (which is how v1.1.0/v1.2.0 went untagged).
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+# Serialize release runs so two overlapping pushes can't both pass the
+# "release exists?" check and then race on `gh release create`.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -24,13 +34,29 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Extract changelog section for this tag
-        run: python tools/changelog_extract.py "${GITHUB_REF_NAME}" > RELEASE_NOTES.md
+      - name: Determine newest released version
+        id: ver
+        run: echo "version=$(python tools/changelog_extract.py --latest-version)" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
+      - name: Skip if the release already exists
+        id: check
+        if: steps.ver.outputs.version != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "${GITHUB_REF_NAME}" \
+          if gh release view "v${{ steps.ver.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create the release (and its tag)
+        if: steps.ver.outputs.version != '' && steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python tools/changelog_extract.py "${{ steps.ver.outputs.version }}" > RELEASE_NOTES.md
+          gh release create "v${{ steps.ver.outputs.version }}" \
+            --target "${GITHUB_SHA}" \
+            --title "v${{ steps.ver.outputs.version }}" \
             --notes-file RELEASE_NOTES.md

@@ -76,9 +76,11 @@ python -m ruff check tools/ tests/
 ```
 
 CI (`.github/workflows/validate.yml`) runs the schema meta-check, validates the example packs
-(directory and zip form), runs the tests across Python 3.10–3.13, and lints. The schemas are
-published to GitHub Pages on every push to `main`, and pushing a `vX.Y.Z` tag cuts a GitHub
-Release from the matching `CHANGELOG.md` section.
+(directory and zip form), runs the tests across Python 3.10–3.13, lints, checks that the spec,
+README, and `CHANGELOG.md` versions agree, and builds the docs site. On every push to `main` the
+docs are published to GitHub Pages, and a GitHub Release is cut automatically for the newest
+released `CHANGELOG.md` version if one does not already exist — so a reviewed version bump
+releases itself on merge. No manual tagging required.
 
 ## License
 

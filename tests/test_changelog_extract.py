@@ -44,6 +44,22 @@ def test_unknown_version_is_empty():
     assert ce.extract(SAMPLE, "9.9.9") == ""
 
 
+def test_latest_version_skips_unreleased():
+    assert ce.latest_version(SAMPLE) == "1.2.0"
+
+
+def test_latest_version_none_when_no_release():
+    assert ce.latest_version("# Changelog\n\n## [Unreleased]\n") is None
+
+
+def test_main_latest_version_flag(capsys):
+    rc = ce.main(["changelog_extract.py", "--latest-version", str(ROOT / "CHANGELOG.md")])
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == ce.latest_version(
+        (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    )
+
+
 def test_extracts_repo_changelog_current_version():
     text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     assert ce.extract(text, "1.2.0").strip()    # the real changelog has a 1.2.0 section
