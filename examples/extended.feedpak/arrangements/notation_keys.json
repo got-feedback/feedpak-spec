@@ -27,7 +27,6 @@
     {
       "idx": 2,
       "t": 2.0,
-      "tempo": 90.0,
       "staves": {
         "rh": {"voices": [{"v": 1, "beats": [
           {"t": 2.0, "dur": 2, "notes": [{"midi": 71}]},
