@@ -26,6 +26,10 @@ arrangements:
     file: arrangements/bass.json
     tuning: [0, 0, 0, 0]
     capo: 0
+  - id: keys
+    name: Keys
+    type: piano
+    notation: arrangements/notation_keys.json
 stems:
   - id: full
     file: stems/full.ogg
