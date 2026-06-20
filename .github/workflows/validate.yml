@@ -89,7 +89,8 @@ jobs:
       - name: Assemble docs tree
         run: python tools/gen_docs.py
       - name: Build site (strict — fails on broken links/anchors)
-        run: mkdocs build --strict
+        run: |
+          SPEC_VERSION="$(python tools/changelog_extract.py --latest-version)" mkdocs build --strict
 
   links:
     runs-on: ubuntu-latest

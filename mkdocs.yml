@@ -19,6 +19,7 @@ validation:
 
 theme:
   name: material
+  custom_dir: overrides
   icon:
     repo: fontawesome/brands/github
   palette:
@@ -67,3 +68,9 @@ nav:
   - Specification: feedpak-v1.md
   - Hand-editing guide: hand-editing.md
   - Changelog: changelog.md
+
+extra:
+  # Stamped at build time by the pages/docs workflows (SPEC_VERSION = newest released
+  # CHANGELOG version). Rendered by overrides/main.html as the announcement bar, so the
+  # site's version is deterministic and never depends on the cached GitHub release widget.
+  spec_version: !ENV [SPEC_VERSION, "dev"]

@@ -10,6 +10,13 @@ relate.
 
 ## [Unreleased]
 
+### Added
+- Docs site (no format change): a build-time version banner. The site now stamps the newest
+  released `CHANGELOG.md` version (`SPEC_VERSION` env → `mkdocs.yml` `extra.spec_version` →
+  `overrides/main.html`) into a top announcement bar, so the displayed version is deterministic
+  and no longer depends on Material's client-side GitHub-release widget (which is cached in the
+  browser's localStorage and could lag a release).
+
 ## [1.5.0] - 2026-06-21
 
 Additive (MINOR) release: per-note teaching marks. Backward-compatible — a 1.0.0 pack is also a

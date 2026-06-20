@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+<!--
+  Bake the spec version into a top announcement bar at build time, from the
+  SPEC_VERSION env var (set by the pages/docs workflows to the newest released
+  CHANGELOG version). This is deterministic and does NOT depend on the GitHub
+  release-facts widget, which is fetched client-side and cached in localStorage
+  (so it can lag a release). See .github/workflows/pages.yml.
+-->
+{% block announce %}
+  feedpak specification — <strong>v{{ config.extra.spec_version }}</strong>
+{% endblock %}
