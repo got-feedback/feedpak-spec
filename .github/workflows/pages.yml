@@ -44,7 +44,8 @@ jobs:
         run: python tools/gen_docs.py
 
       - name: Build site
-        run: mkdocs build
+        run: |
+          SPEC_VERSION="$(python tools/changelog_extract.py --latest-version)" mkdocs build
 
       - uses: actions/configure-pages@v5
 
