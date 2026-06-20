@@ -1,5 +1,13 @@
 {
   "version": 1,
+  "tempos": [
+    {"time": 0.0, "bpm": 120.0},
+    {"time": 2.0, "bpm": 90.0}
+  ],
+  "time_signatures": [
+    {"time": 0.0, "ts": [4, 4]},
+    {"time": 2.0, "ts": [6, 8]}
+  ],
   "beats": [
     {"time": 0.0, "measure": 1},
     {"time": 0.5, "measure": -1},

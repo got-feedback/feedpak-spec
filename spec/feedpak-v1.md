@@ -7,7 +7,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.1.0
+- **Specification version:** 1.2.0
 - **Format major version:** 1
 - **Status:** Draft
 - **Date:** 2026-06-20
@@ -140,12 +140,15 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.1.0"
+feedpak_version: "1.2.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.1.0"`. (Version 1.1.0 added the optional [`authors`](#54-authors) list
-  additively; an older 1.0.0 Reader simply ignores it.)
+  `feedpak_version: "1.2.0"`. (Version 1.1.0 added the optional [`authors`](#54-authors) list;
+  1.2.0 added the optional song-level [`tempos`](#74-song_timelinejson) and
+  [`time_signatures`](#74-song_timelinejson) plus a per-arrangement
+  [`tempos`](#610-per-arrangement-tempo-optional) override. All are additive; an older Reader
+  simply ignores what it does not recognise.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
@@ -379,6 +382,7 @@ reference for it.
   "templates":  [ /* §6.6 */ ],
   "phrases":    [ /* OPTIONAL, §6.7 */ ],
   "tones":      { /* OPTIONAL, §6.9 */ },
+  "tempos":     [ /* OPTIONAL, §6.10 — per-chart tempo override */ ],
   "beats":      [ /* §6.8 — see note */ ],
   "sections":   [ /* §6.8 — see note */ ]
 }
@@ -549,6 +553,32 @@ when the source carries no tone data.
 
 All three sub-keys are individually OPTIONAL.
 
+### 6.10. Per-arrangement tempo (OPTIONAL)
+
+A chart MAY declare its own tempo map, overriding the song-wide tempo for that arrangement only.
+This supports an arrangement authored at a different tempo from the rest of the song (a half-time
+feel, a slowed practice chart, …). The shape is identical to the song-level
+[`tempos`](#74-song_timelinejson):
+
+```json
+"tempos": [
+  {"time": 0.0, "bpm": 80.0},
+  {"time": 30.0, "bpm": 160.0}
+]
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `time` | number | Event time (s). REQUIRED. |
+| `bpm` | number | Beats per minute, `> 0`. REQUIRED. Applies until the next event. |
+
+**Priority.** When the consumer plays this arrangement and the arrangement carries a non-empty
+`tempos`, a Reader **MUST** use it and **MUST** ignore the song-level
+[`song_timeline.json` `tempos`](#74-song_timelinejson) for this chart. When the arrangement omits
+`tempos`, the song-level tempo applies. A Writer **MUST omit the key entirely** when the chart
+follows the song tempo rather than emit `"tempos": []`. `time_signatures` are **song-level only**
+and are not overridden per arrangement.
+
 ---
 
 ## 7. Side-files
@@ -636,12 +666,21 @@ its own manifest key so the two never collide:
 
 ### 7.4. `song_timeline.json`
 
-Referenced by the manifest `song_timeline` key. Moves song-wide beats and sections out of the
-first arrangement JSON into a dedicated file:
+Referenced by the manifest `song_timeline` key. Holds the song-wide rhythmic grid — beats,
+sections, and (since 1.2.0) the song's tempo and time-signature maps — in one dedicated,
+instrument-independent file, out of the first arrangement JSON:
 
 ```json
 {
   "version": 1,
+  "tempos": [
+    {"time": 0.000, "bpm": 120.0},
+    {"time": 64.000, "bpm": 90.0}
+  ],
+  "time_signatures": [
+    {"time": 0.000, "ts": [4, 4]},
+    {"time": 32.000, "ts": [6, 8]}
+  ],
   "beats": [
     {"time": 0.500, "measure": 1},
     {"time": 1.000, "measure": -1},
@@ -655,6 +694,20 @@ first arrangement JSON into a dedicated file:
 }
 ```
 
+`tempos` and `time_signatures` are each OPTIONAL, time-ordered, and follow the same
+"each entry applies until the next" rule as [`keys.json`](#77-keysjson). Adding them did not
+change the file's `version`, which stays `1`.
+
+| `tempos[]` field | Type | Notes |
+|---|---|---|
+| `time` | number | Event time (s). REQUIRED. |
+| `bpm` | number | Beats per minute, `> 0`. REQUIRED. In effect until the next `tempos` entry. |
+
+| `time_signatures[]` field | Type | Notes |
+|---|---|---|
+| `time` | number | Event time (s). REQUIRED. |
+| `ts` | int[2] | `[numerator, denominator]`, each `≥ 1` (same convention as notation `ts`, [§7.6](#76-notation_idjson)). REQUIRED. In effect until the next entry. |
+
 | `beats[]` field | Type | Notes |
 |---|---|---|
 | `time` | number | Beat timestamp (s). |
@@ -665,6 +718,11 @@ first arrangement JSON into a dedicated file:
 | `name` | string | Song-structure name (`intro`, `verse`, `chorus`, …). |
 | `number` | int | Repeat number. |
 | `time` | number | Section start (s). |
+
+The song-level `tempos` map is the song-wide **playback/timing** tempo, distinct from the
+per-measure `tempo` inside [`notation_<id>.json`](#76-notation_idjson) (§7.6), which exists for
+staff rendering. An arrangement MAY override `tempos` for its own chart — see
+[§6.10](#610-per-arrangement-tempo-optional).
 
 When `song_timeline.json` is present and valid, its data **MUST** take priority over any
 beats/sections embedded in arrangement JSON. When absent, the Reader **MUST** fall back to the
@@ -821,6 +879,13 @@ Each entry applies until the next:
   ]
 }
 ```
+
+> **Note — `keys.json` is not a keyboard part.** Despite the name, this file is a song-level
+> musical-key/scale track and is **instrument-independent**: it has nothing to do with a keyboard
+> or piano arrangement (an arrangement `type: keys`, or a `notation_<id>.json`). A guitar-only,
+> drums-only, or stems-only pack uses `keys.json` to tell the player "the song is in Em, then
+> changes to G major at 64.5 s" with no keyboard part anywhere in the package. The `keys` manifest
+> pointer (this file) and the `keys` instrument hint are unrelated.
 
 ---
 

@@ -12,5 +12,9 @@
     {"time": 0.0, "fret": 1, "width": 4}
   ],
   "handshapes": [],
-  "templates": []
+  "templates": [],
+  "tempos": [
+    {"time": 0.0, "bpm": 60.0},
+    {"time": 2.0, "bpm": 120.0}
+  ]
 }

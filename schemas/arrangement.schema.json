@@ -22,6 +22,7 @@
       "items": { "$ref": "#/$defs/phrase" }
     },
     "tones": { "type": "object" },
+    "tempos": { "type": "array", "items": { "$ref": "#/$defs/tempoEvent" } },
     "beats": { "type": "array", "items": { "$ref": "#/$defs/beat" } },
     "sections": { "type": "array", "items": { "$ref": "#/$defs/section" } }
   },
@@ -101,6 +102,15 @@
         "end_time": { "type": "number" },
         "max_difficulty": { "type": "integer" },
         "levels": { "type": "array" }
+      }
+    },
+    "tempoEvent": {
+      "type": "object",
+      "required": ["time", "bpm"],
+      "additionalProperties": true,
+      "properties": {
+        "time": { "type": "number" },
+        "bpm": { "type": "number", "exclusiveMinimum": 0 }
       }
     },
     "beat": {

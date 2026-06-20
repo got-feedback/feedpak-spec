@@ -10,6 +10,29 @@ relate.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-20
+
+Additive (MINOR) release: new optional song-level and per-arrangement timing data, all
+backward-compatible with 1.0.0/1.1.0 readers.
+
+### Added
+- **Song-level `tempos` and `time_signatures`** in
+  [`song_timeline.json`](spec/feedpak-v1.md#74-song_timelinejson) ([spec §7.4](spec/feedpak-v1.md#74-song_timelinejson)):
+  two OPTIONAL time-ordered event arrays giving the song-wide tempo (`{time, bpm}`) and meter
+  (`{time, ts: [num, den]}`) maps. Each event applies until the next, like `keys.json`. This gives
+  guitar/game consumers a song-wide BPM and meter that previously existed only per-measure inside
+  notation files. The file's `version` stays `1`.
+- **Per-arrangement `tempos` override** ([spec §6.10](spec/feedpak-v1.md#610-per-arrangement-tempo-optional)):
+  an arrangement JSON MAY carry its own `tempos` map; when present a Reader uses it for that chart
+  and ignores the song-level tempo. Mirrors the §7.4 side-file-priority rule.
+- **`keys.json` disambiguation note** ([spec §7.7](spec/feedpak-v1.md#77-keysjson)): clarifies that
+  the key/scale track is instrument-independent and unrelated to a keyboard arrangement — a
+  guitar-only pack can signal key changes with no keyboard part. No schema change.
+- Schema and example updates: `tempos`/`time_signatures` in
+  [`schemas/song-timeline.schema.json`](schemas/song-timeline.schema.json), a `$defs/tempoEvent`
+  and `tempos` property in [`schemas/arrangement.schema.json`](schemas/arrangement.schema.json),
+  exercised by the extended example pack (song timeline + a per-chart bass override).
+
 ## [1.1.0] - 2026-06-20
 
 Additive (MINOR) release: a new optional manifest field, backward-compatible with 1.0.0 readers.
@@ -48,6 +71,7 @@ Initial public release of the feedpak format specification.
 - Repository governance: README, CONTRIBUTING (DCO + enhancement-proposal process),
   GOVERNANCE, CODE_OF_CONDUCT, and dual CC0/MIT licensing.
 
-[Unreleased]: https://github.com/got-feedback/feedback-feedpak-spec/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/got-feedback/feedback-feedpak-spec/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/got-feedback/feedback-feedpak-spec/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/got-feedback/feedback-feedpak-spec/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/got-feedback/feedback-feedpak-spec/releases/tag/v1.0.0

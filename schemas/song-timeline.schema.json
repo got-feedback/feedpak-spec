@@ -8,6 +8,35 @@
   "additionalProperties": true,
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
+    "tempos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["time", "bpm"],
+        "additionalProperties": true,
+        "properties": {
+          "time": { "type": "number" },
+          "bpm": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+    "time_signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["time", "ts"],
+        "additionalProperties": true,
+        "properties": {
+          "time": { "type": "number" },
+          "ts": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
     "beats": {
       "type": "array",
       "items": {
