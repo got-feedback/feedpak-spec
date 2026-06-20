@@ -10,6 +10,12 @@ relate.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-20
+
+Tooling, docs, and example release — no on-disk format change (a 1.2.0 pack is also a valid
+1.3.0 pack). Bundles the repository's testing/CI, the documentation site, release automation,
+and a worked keyboard-notation example.
+
 ### Added
 - Repository CI/CD (no format change): a `pytest` test suite for the reference validator
   (`tests/`), a Python 3.10–3.13 matrix and a `ruff` lint job in the validate workflow, and a
@@ -88,7 +94,8 @@ Initial public release of the feedpak format specification.
 - Repository governance: README, CONTRIBUTING (DCO + enhancement-proposal process),
   GOVERNANCE, CODE_OF_CONDUCT, and dual CC0/MIT licensing.
 
-[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/got-feedback/feedpak-spec/releases/tag/v1.0.0
