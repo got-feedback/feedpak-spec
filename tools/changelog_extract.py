@@ -4,7 +4,8 @@
 """Print the CHANGELOG.md body for one version, for use as GitHub Release notes.
 
 Slices the text between a `## [VERSION]` heading and the next `## [` heading.
-Used by the release-on-tag workflow (.github/workflows/release.yml).
+Used by the release-on-merge workflow (.github/workflows/release.yml), which also
+calls `--latest-version` to find which version to release.
 
 Usage:
     python tools/changelog_extract.py 1.2.0

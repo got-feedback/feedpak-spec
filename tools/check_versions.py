@@ -26,7 +26,17 @@ _SPEC_RE = re.compile(r"^- \*\*Specification version:\*\* (\d+\.\d+\.\d+)", re.M
 _README_RE = re.compile(r"\*\*Specification version\*\*\s*\|\s*(\d+\.\d+\.\d+)")
 
 
-def _first(pattern: re.Pattern[str], text: str, label: str) -> str | None:
+def _read(rel: str) -> str | None:
+    try:
+        return (ROOT / rel).read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"error: cannot read {rel}: {exc}", file=sys.stderr)
+        return None
+
+
+def _first(pattern: re.Pattern[str], text: str | None, label: str) -> str | None:
+    if text is None:
+        return None
     m = pattern.search(text)
     if not m:
         print(f"error: could not find the version in {label}", file=sys.stderr)
@@ -35,11 +45,11 @@ def _first(pattern: re.Pattern[str], text: str, label: str) -> str | None:
 
 
 def main() -> int:
-    spec = _first(_SPEC_RE, (ROOT / "spec" / "feedpak-v1.md").read_text(encoding="utf-8"),
-                  "spec/feedpak-v1.md")
-    readme = _first(_README_RE, (ROOT / "README.md").read_text(encoding="utf-8"), "README.md")
-    changelog = latest_version((ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
-    if changelog is None:
+    spec = _first(_SPEC_RE, _read("spec/feedpak-v1.md"), "spec/feedpak-v1.md")
+    readme = _first(_README_RE, _read("README.md"), "README.md")
+    changelog_text = _read("CHANGELOG.md")
+    changelog = latest_version(changelog_text) if changelog_text is not None else None
+    if changelog_text is not None and changelog is None:
         print("error: no released version section in CHANGELOG.md", file=sys.stderr)
 
     found = {"spec": spec, "README": readme, "CHANGELOG": changelog}
