@@ -102,9 +102,10 @@ my-song.feedpak/
    slashes, no leading `/`, no `..` segments, no empty segments (`//`), no colon (`:`) — which
    excludes drive letters and alternate-data-stream paths — and no backslashes. Readers **MUST**
    reject paths that escape the package root.
-3. **YAML for the manifest, JSON for data files.** The manifest is YAML so it is comfortable to
-   hand-edit; all structured data files are JSON so they are fast to parse and round-trip. A
-   YAML manifest is, by [YAML 1.2](https://yaml.org/spec/1.2.2/) rules, valid against the
+3. **YAML for the manifest, JSON (or JSONC) for data files.** The manifest is YAML so it is
+   comfortable to hand-edit; all structured data files are JSON (or JSONC, where the `.jsonc`
+   extension signals that the file MAY contain `//` line comments and `/* */` block comments).
+   A YAML manifest is, by [YAML 1.2](https://yaml.org/spec/1.2.2/) rules, valid against the
    JSON-Schema definitions in [`schemas/`](../schemas/) (YAML is a JSON superset for this
    purpose).
 
@@ -112,8 +113,8 @@ my-song.feedpak/
 
 ## 3. Encodings and conventions
 
-- **Text files** (`manifest.yaml`, all `*.json`) **MUST** be UTF-8 encoded. A Writer **SHOULD
-  NOT** emit a byte-order mark.
+- **Text files** (`manifest.yaml`, all `*.json`, all `*.jsonc`) **MUST** be UTF-8 encoded. A Writer **SHOULD
+   NOT** emit a byte-order mark.
 - **Time** is always expressed in **seconds as a JSON number** (floating point), measured from
   the start of the song's audio. Time fields are named `t` or `time`. Writers **MUST NOT** use
   milliseconds, ticks, or sample counts.
@@ -367,9 +368,9 @@ it, and a Reader that does not understand it ignores it per [§1.2](#12-roles).
 
 ## 6. Arrangement JSON
 
-Arrangement files (`arrangements/<id>.json`) carry the playable note/chord data for one
-arrangement — the **wire format**. This document defines that format; it is the authoritative
-reference for it.
+Arrangement files (`arrangements/<id>.json`, or `arrangements/<id>.jsonc` for hand-edited
+packs) carry the playable note/chord data for one arrangement — the **wire format**. This
+document defines that format; it is the authoritative reference for it.
 
 ### 6.1. Top-level shape
 
@@ -654,10 +655,12 @@ and are not overridden per arrangement.
 
 Each side-file is referenced from the manifest by a pointer key (the "manifest opt-in, file off
 to the side" pattern; see [§9.1](#91-the-golden-rule-manifest-opt-in-file-off-to-the-side)).
-Every side-file that is a JSON **object SHOULD** carry a top-level integer `version` (see
-[§4.3](#43-side-file-schema-versions)). The one exception is `lyrics.json`, which is a flat JSON
-array kept for backward compatibility: it carries no `version` field, and its origin and
-revision are tracked at the manifest level instead (`lyrics_source`, `lyric_transcription`).
+Side-files use the `.json` extension by convention; hand-edited side-files MAY use `.jsonc` to
+signal that the file contains comments. Every side-file that is a JSON **object SHOULD** carry a
+top-level integer `version` (see [§4.3](#43-side-file-schema-versions)). The one exception is
+`lyrics.json`, which is a flat JSON array kept for backward compatibility: it carries no
+`version` field, and its origin and revision are tracked at the manifest level instead
+(`lyrics_source`, `lyric_transcription`).
 
 ### 7.1. `lyrics.json`
 
@@ -968,6 +971,12 @@ quick metadata view. For a full load, resolve each manifest pointer to its file,
 against the relevant schema, and merge per the priority rules in [§6.1](#61-top-level-shape) and
 [§7.4](#74-song_timelinejson). Unknown manifest keys and files are retained, not discarded.
 
+**JSONC comments.** When a manifest pointer resolves to a `.jsonc` file, a Reader **MUST** strip
+C-style comments (`//` line comments and `/* */` block comments) before parsing the JSON content.
+A Writer that preserves edits to a `.jsonc` file **SHOULD** leave the original comments intact.
+For new hand-edited packs, Writers **MAY** write `.jsonc` data files and **MAY** include comments
+in them.
+
 **Writing.** Build the package in a working directory: write `arrangements/<id>.json` per
 arrangement; encode audio into `stems/`; write any side-files; compose `manifest.yaml` last so
 its index matches what was written. Emit YAML with block style and **preserve key order** for
@@ -996,7 +1005,7 @@ implementations is required.
 
 - **Manifest keys:** `snake_case`, descriptive; singular for one value (`lyrics`, `cover`,
   `drum_tab`), plural for lists (`stems`, `arrangements`).
-- **Filenames:** lowercase; JSON for structured data, OGG for audio, JPEG/PNG for images.
+- **Filenames:** lowercase; JSON (`.json`) or JSONC (`.jsonc`) for structured data, OGG for audio, JPEG/PNG for images.
 - **JSON fields:** short names for hot-path data streamed many times (`t`, `s`, `f`); long names
   for one-off metadata.
 - **Time fields:** always `t` or `time`, always seconds as floats.

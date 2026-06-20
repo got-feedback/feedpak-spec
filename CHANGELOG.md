@@ -16,6 +16,15 @@ relate.
   `overrides/main.html`) into a top announcement bar, so the displayed version is deterministic
   and no longer depends on Material's client-side GitHub-release widget (which is cached in the
   browser's localStorage and could lag a release).
+- **JSONC support** ([§2.2](spec/feedpak-v1.md#22-three-core-rules),
+  [§3](spec/feedpak-v1.md#3-encodings-and-conventions),
+  [§8](spec/feedpak-v1.md#8-reading-and-writing)): `.jsonc` files (C-style-commented JSON) are
+  now accepted anywhere `.json` files are specified. Hand-edited data files MAY use the `.jsonc`
+  extension to signal that they contain comments; Readers strip comments before parsing, and
+  Writers SHOULD preserve them on round-trip. The reference validator (`tools/validate.py`)
+  parses `.jsonc` files accordingly. This is a backward-compatible MINORY addition (older
+  Readers simply parse `.jsonc` files as plain JSON when they ignore the unrecognised extension);
+  no existing pack needs regeneration.
 
 ## [1.5.0] - 2026-06-21
 

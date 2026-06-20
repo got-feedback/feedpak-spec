@@ -139,6 +139,77 @@ def test_empty_arrangement_tempos_fails(tmp_path):
     assert any("tempos" in e for e in rep.errors)
 
 
+# --------------------------------------------------------------------------- #
+# .jsonc support
+# --------------------------------------------------------------------------- #
+def test_jsonc_arrangement_passes(tmp_path):
+    m = _base_manifest()
+    m["arrangements"][0]["file"] = "arrangements/lead.jsonc"
+    pack = _make_pack(
+        tmp_path / "ok.feedpak",
+        m,
+        lead={"notes": [{"t": 0.0, "s": 0, "f": 0}]},
+        extra={"arrangements/lead.jsonc": '{"notes": [{"t": 0.0, "s": 0, "f": 0}]}'},
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert rep.ok, rep.errors
+
+
+def test_jsonc_arrangement_with_comments_passes(tmp_path):
+    m = _base_manifest()
+    m["arrangements"][0]["file"] = "arrangements/lead.jsonc"
+    jsonc = """
+    {
+        // this is a line comment
+        "notes": [
+            { "t": 0.0, "s": 0, "f": 0 }  /* inline block comment */
+        ]
+    }
+    """
+    pack = _make_pack(
+        tmp_path / "ok.feedpak",
+        m,
+        extra={"arrangements/lead.jsonc": jsonc},
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert rep.ok, rep.errors
+
+
+def test_jsonc_side_file_passes(tmp_path):
+    m = _base_manifest()
+    m["song_timeline"] = "song_timeline.jsonc"
+    jsonc = """
+    {
+        "version": 1,
+        "tempos": [
+            { "time": 0.0, "bpm": 120.0 }
+        ]
+    }
+    """
+    pack = _make_pack(
+        tmp_path / "ok.feedpak",
+        m,
+        extra={"song_timeline.jsonc": jsonc},
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert rep.ok, rep.errors
+
+
+def test_jsonc_malformed_comments_fails(tmp_path):
+    m = _base_manifest()
+    m["arrangements"][0]["file"] = "arrangements/lead.jsonc"
+    # Unterminated block comment — should fail
+    bad_jsonc = '{"notes": [{"t": 0.0, "s": 0, "f": 0} /* no end }'
+    pack = _make_pack(
+        tmp_path / "bad.feedpak",
+        m,
+        extra={"arrangements/lead.jsonc": bad_jsonc},
+    )
+    rep = validate.resolve_and_validate(pack)
+    assert not rep.ok
+    assert any("not valid JSON" in e for e in rep.errors)
+
+
 def test_tempo_event_missing_bpm_fails(tmp_path):
     m = _base_manifest()
     m["song_timeline"] = "song_timeline.json"

@@ -66,6 +66,27 @@ SIDE_FILE_SCHEMAS = {
 }
 NON_JSON_POINTERS = ("cover", "preview")
 
+# Regex to match JSON string literals (preserved) and C-style comments (stripped).
+# This is used by _parse_jsonc to handle .jsonc files.
+_JSONC_STRIP_RE = re.compile(
+    r'"(?:[^"\\]|\\.)*"|'   # string literal — keep as-is
+    r'//.*|'                  # // line comment — strip
+    r'/\*[\s\S]*?\*/',        # /* block comment */ — strip
+)
+
+
+def _parse_jsonc(text: str) -> object:
+    """Parse a JSONC string, stripping C-style comments before JSON parsing.
+
+    Handles ``//`` line comments and ``/* */`` block comments, respecting
+    string boundaries so that comment-like text inside strings is preserved.
+    """
+    stripped = _JSONC_STRIP_RE.sub(
+        lambda m: m.group(0) if m.group(0).startswith('"') else '',
+        text,
+    )
+    return json.loads(stripped)
+
 
 def load_schema(name: str) -> Draft202012Validator:
     with open(SCHEMA_DIR / name, encoding="utf-8") as fh:
@@ -116,7 +137,11 @@ def validate_json_file(root: Path, relpath: str, validator: Draft202012Validator
         rep.err(f"missing file referenced by manifest: {relpath}")
         return
     try:
-        data = json.loads(target.read_text(encoding="utf-8"))
+        raw = target.read_text(encoding="utf-8")
+        if relpath.endswith(".jsonc"):
+            data = _parse_jsonc(raw)
+        else:
+            data = json.loads(raw)
     except Exception as exc:  # noqa: BLE001
         rep.err(f"{relpath}: not valid JSON ({exc})")
         return

@@ -311,6 +311,34 @@ For your own use you can skip this entirely — readers accept the directory for
 
 ---
 
+## Tips for hand-editing JSON data files
+
+Most data files in a feedpak use JSON, which does not allow comments. If you find yourself making
+repeated manual edits to a data file and want to leave yourself notes, rename the file from
+`.json` to `.jsonc`. The `.jsonc` extension tells Readers that the file MAY contain `//` line
+comments and `/* */` block comments (see [spec §8](feedpak-v1.md#8-reading-and-writing)). Readers
+strip comments before parsing and good Writers preserve them when re-saving, so your notes survive
+round-trips.
+
+For example, to annotate a `song_timeline.jsonc` with section markers:
+
+```jsonc
+{
+  "version": 1,
+  "tempos": [
+    { "time": 0.0, "bpm": 120.0 }  // verse tempo
+  ],
+  "sections": [
+    { "name": "intro",  "number": 1, "time": 0.0 },
+    { "name": "verse",  "number": 1, "time": 16.0 },
+    { "name": "chorus", "number": 1, "time": 32.0 }
+  ]
+}
+```
+
+Then update the manifest pointer from `song_timeline: song_timeline.json` to
+`song_timeline: song_timeline.jsonc`. Everything else stays the same.
+
 ## Out of scope (for now)
 
 - **Authoring a pack from scratch** (no source file to convert) — more of a developer task. Start
@@ -318,6 +346,7 @@ For your own use you can skip this entirely — readers accept the directory for
 - **Editing notes / chords in `arrangements/*.json`** — technically possible but extremely tedious
   by hand: hundreds of objects with short field names per song. The fields are documented in [spec
   §6 (Arrangement JSON)](feedpak-v1.md#6-arrangement-json), but for any real chart edit you want a
-  dedicated arrangement editor.
+  dedicated arrangement editor. (If you do attempt it, consider renaming the file to `.jsonc` so
+  your edits can carry comments.)
 - **Loudness normalization / advanced stem processing** — out of scope here; standard audio-editor
   or `ffmpeg` workflows apply to any OGG file before you drop it into `stems/`.
