@@ -140,7 +140,7 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.0.0"
+feedpak_version: "1.1.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
