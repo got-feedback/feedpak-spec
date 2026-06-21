@@ -113,8 +113,8 @@ my-song.feedpak/
 
 ## 3. Encodings and conventions
 
-- **Text files** (`manifest.yaml`, all `*.json`, all `*.jsonc`) **MUST** be UTF-8 encoded. A Writer **SHOULD
-   NOT** emit a byte-order mark.
+- **Text files** (`manifest.yaml`, all `*.json`, all `*.jsonc`) **MUST** be UTF-8 encoded. A
+  Writer **SHOULD NOT** emit a byte-order mark.
 - **Time** is always expressed in **seconds as a JSON number** (floating point), measured from
   the start of the song's audio. Time fields are named `t` or `time`. Writers **MUST NOT** use
   milliseconds, ticks, or sample counts.
@@ -973,9 +973,18 @@ against the relevant schema, and merge per the priority rules in [§6.1](#61-top
 
 **JSONC comments.** When a manifest pointer resolves to a `.jsonc` file, a Reader **MUST** strip
 C-style comments (`//` line comments and `/* */` block comments) before parsing the JSON content.
-A Writer that preserves edits to a `.jsonc` file **SHOULD** leave the original comments intact.
-For new hand-edited packs, Writers **MAY** write `.jsonc` data files and **MAY** include comments
-in them.
+Comments are the **only** relaxation permitted: trailing commas, single-quoted strings, and other
+JSON5-style extensions are **NOT** allowed — after comment removal the content **MUST** be strict,
+valid JSON. A Writer that preserves edits to a `.jsonc` file **SHOULD** leave the original comments
+intact. For new hand-edited packs, Writers **MAY** write `.jsonc` data files and **MAY** include
+comments in them.
+
+Note on compatibility: a comment-free `.jsonc` file is byte-for-byte valid JSON, but a `.jsonc`
+file that *contains* comments can only be read by a Reader that implements this comment-stripping
+step — a plain JSON parser errors on `//` and `/* */`. This is still an additive change (no
+existing pack is affected; packs that do not opt into `.jsonc` are unchanged), but a Writer that
+needs a pack to be readable by the broadest range of Readers **SHOULD** keep its data files as
+comment-free `.json`.
 
 **Writing.** Build the package in a working directory: write `arrangements/<id>.json` per
 arrangement; encode audio into `stems/`; write any side-files; compose `manifest.yaml` last so

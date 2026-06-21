@@ -210,6 +210,21 @@ def test_jsonc_malformed_comments_fails(tmp_path):
     assert any("not valid JSON" in e for e in rep.errors)
 
 
+def test_jsonc_comment_like_text_in_strings_preserved():
+    # String values that contain // or /* */ must survive comment stripping intact.
+    text = '''{
+        "url": "https://example.com//path",   // real comment
+        "note": "a /* not a comment */ b",
+        "q": "he said \\"hi //\\" loudly"
+    }'''
+    data = validate._parse_jsonc(text)
+    assert data == {
+        "url": "https://example.com//path",
+        "note": "a /* not a comment */ b",
+        "q": 'he said "hi //" loudly',
+    }
+
+
 def test_tempo_event_missing_bpm_fails(tmp_path):
     m = _base_manifest()
     m["song_timeline"] = "song_timeline.json"

@@ -21,10 +21,13 @@ relate.
   [§8](spec/feedpak-v1.md#8-reading-and-writing)): `.jsonc` files (C-style-commented JSON) are
   now accepted anywhere `.json` files are specified. Hand-edited data files MAY use the `.jsonc`
   extension to signal that they contain comments; Readers strip comments before parsing, and
-  Writers SHOULD preserve them on round-trip. The reference validator (`tools/validate.py`)
-  parses `.jsonc` files accordingly. This is a backward-compatible MINORY addition (older
-  Readers simply parse `.jsonc` files as plain JSON when they ignore the unrecognised extension);
-  no existing pack needs regeneration.
+  Writers SHOULD preserve them on round-trip. Only comments are permitted — trailing commas and
+  other JSON5-style relaxations are not; after comment removal a `.jsonc` file MUST be strict JSON.
+  The reference validator (`tools/validate.py`) parses `.jsonc` files accordingly. This is an
+  additive MINOR change: no existing pack is affected. A comment-free `.jsonc` file is plain JSON,
+  but a `.jsonc` file that contains comments is readable only by Readers that implement the
+  comment-stripping step (a plain JSON parser errors on `//`), so a Writer needing maximum
+  reader compatibility SHOULD keep data files as comment-free `.json`.
 
 ## [1.5.0] - 2026-06-21
 
