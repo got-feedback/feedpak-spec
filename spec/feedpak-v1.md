@@ -208,16 +208,20 @@ in this document:
 
 1. The [`.jsonc` extension](#8-reading-and-writing) (1.6.0), whose files may contain comments a
    Reader **MUST** strip.
-2. [Non-baseline audio stem formats](#53-stems) (1.9.0): a stem encoded in an audio format
-   outside the MUST-decode baseline (e.g. FLAC, Opus). A Reader that does not support that
-   format cannot play that stem.
+2. [Audio stem formats beyond OGG](#532-audio-formats--baseline-dispatch-and-portability)
+   (1.9.0): any stem not encoded as OGG (Vorbis). 1.9.0 both widens the MUST-decode baseline from
+   OGG alone to **OGG + WAV** and allows further formats above it (FLAC, Opus, …). Because OGG was
+   the only format guaranteed before 1.9.0, a Reader predating 1.9.0 may not decode even a baseline
+   WAV stem, and no Reader is ever required to decode the above-baseline formats.
 
 The justification for keeping each minor rather than major is that they are **strictly opt-in and
 per-file**: a pack that does not adopt `.jsonc` — and a `.jsonc` file with no comments — is
-byte-for-byte ordinary JSON every Reader handles; likewise a pack whose stems stay within the
-audio baseline is decodable by every Reader. Only a pack that *actually uses* a relaxation (a
-comment-bearing `.jsonc` file, or a non-baseline stem with no baseline alternative) requires a
-Reader supporting the minor version that introduced it. This is therefore an explicit, bounded exception both to the "older Readers keep working by
+byte-for-byte ordinary JSON every Reader handles; likewise a pack whose stems are all OGG is
+decodable by every Reader regardless of version. Only a pack that *actually uses* a relaxation (a
+comment-bearing `.jsonc` file, or a non-OGG stem with no OGG alternative) requires a Reader
+supporting a later version — a 1.9.0 Reader for a WAV-only pack, or a Reader that opted into the
+above-baseline format otherwise. A Writer wanting maximum cross-version compatibility therefore
+**SHOULD** include an OGG stem. This is therefore an explicit, bounded exception both to the "older Readers keep working by
 ignoring them" rule and to the **Reader rule** that a major-*X* Reader MUST accept any *X.y.z*
 package (a Reader **MAY** reject a package that uses a relaxation it does not implement). It is
 **not** a general license to add un-ignorable changes under a minor bump; any
@@ -345,7 +349,7 @@ stems:
 |---|---|---|---|
 | `id` | string | — | **REQUIRED.** Stable identifier referenced by consumers. |
 | `file` | string (path) | — | **REQUIRED.** Path to the audio file. |
-| `codec` | string | — | OPTIONAL disambiguation hint (e.g. `"vorbis"`, `"opus"`, `"pcm"`, `"mp3"`, `"flac"`). When absent, the codec is inferred from the file extension. Provide it only when the extension is ambiguous (container ≠ codec). |
+| `codec` | string | — | OPTIONAL codec hint (e.g. `"vorbis"`, `"opus"`, `"pcm"`, `"mp3"`, `"flac"`). When absent, the codec is inferred from the file extension; when present it **overrides** the extension (see [§5.3.2](#532-audio-formats--baseline-dispatch-and-portability)). Its main use is disambiguating an extension that doesn't pin the codec (container ≠ codec), but it MAY be set redundantly to be explicit. |
 | `default` | boolean | `false` | Whether this stem is enabled when the song opens. |
 
 `default` is logically boolean. For hand-edited convenience, Readers **MUST** also accept the
