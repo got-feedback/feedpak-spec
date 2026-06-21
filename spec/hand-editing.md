@@ -106,11 +106,13 @@ rhythm guitar, and you'd rather play and record your own take.
 
 ### Step 4 — Drop it in and update the manifest
 
-1. Copy `rhythm_custom.ogg` into the pack's `stems/` folder.
+1. Copy your exported file into the pack's `stems/` folder (this guide uses `rhythm_custom.ogg`;
+   if you exported a different format in Step 3, substitute that filename — e.g.
+   `rhythm_custom.flac` — everywhere below, and keep at least one OGG/WAV stem for portability).
 2. Open `manifest.yaml` in any plain-text editor (VS Code, Notepad++, BBEdit, gedit — all fine;
    just **don't use a word processor**).
 3. Find the `stems:` block ([spec §5.3](feedpak-v1.md#53-stems)). Mark the stem you want enabled
-   on open with `default: true`:
+   on open with `default: true` (the `file:` value must match the extension you exported):
 
    ```yaml
    stems:
