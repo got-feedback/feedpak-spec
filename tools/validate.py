@@ -88,8 +88,11 @@ def _parse_jsonc(text: str) -> object:
         if s.startswith('"'):
             return s                      # string literal — keep verbatim
         if s.startswith("/*"):
-            return "\n" * s.count("\n")   # block comment — keep line structure
-        return ""                         # // line comment (no embedded newline)
+            # A comment is whitespace: never concatenate the tokens around it
+            # (e.g. 1/*c*/2 must not become 12). Keep embedded newlines for
+            # error-line fidelity; otherwise collapse to a single space.
+            return "\n" * s.count("\n") if "\n" in s else " "
+        return ""                         # // line comment — the EOL newline remains
 
     return json.loads(_JSONC_STRIP_RE.sub(_strip, text))
 

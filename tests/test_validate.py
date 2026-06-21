@@ -225,6 +225,13 @@ def test_jsonc_comment_like_text_in_strings_preserved():
     }
 
 
+def test_jsonc_block_comment_does_not_merge_tokens():
+    # A block comment between two number tokens must not be stripped to nothing
+    # (1/*c*/2 -> 12); a comment is whitespace, so the result is invalid JSON (1 2).
+    with pytest.raises(ValueError):
+        validate._parse_jsonc("1/*c*/2")
+
+
 def test_tempo_event_missing_bpm_fails(tmp_path):
     m = _base_manifest()
     m["song_timeline"] = "song_timeline.json"
