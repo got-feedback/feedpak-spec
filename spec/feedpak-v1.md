@@ -7,7 +7,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.7.0
+- **Specification version:** 1.8.0
 - **Format major version:** 1
 - **Status:** Draft
 - **Date:** 2026-06-21
@@ -141,20 +141,21 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.7.0"
+feedpak_version: "1.8.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.7.0"`. (The optional fields added since 1.0.0 —
+  `feedpak_version: "1.8.0"`. (The optional fields added since 1.0.0 —
   [`authors`](#54-authors) in 1.1.0; the song-level [`tempos`](#74-song_timelinejson) /
   [`time_signatures`](#74-song_timelinejson) plus the per-arrangement
   [`tempos`](#610-per-arrangement-tempo-optional) override in 1.2.0; the per-note bend shape
   [`bt`](#621-bend-shape-bt-bnv) / [`bnv`](#621-bend-shape-bt-bnv) in 1.4.0; the per-note
   teaching marks [`fg`](#622-teaching-marks-fg-ch-sd) / [`ch`](#622-teaching-marks-fg-ch-sd) /
   [`sd`](#622-teaching-marks-fg-ch-sd) in 1.5.0; and the per-chord harmony annotations
-  [`fn`](#631-harmonic-function-fn) / [`voicing`](#66-chord-templates) in 1.7.0 — are all
-  additive, so an older Reader simply ignores what it does not recognise. 1.3.0 added no on-disk
-  field. 1.6.0 adds no new manifest
+  [`fn`](#631-harmonic-function-fn) / [`voicing`](#66-chord-templates) in 1.7.0; and the
+  template harmony descriptors [`caged`](#66-chord-templates) / [`guideTones`](#66-chord-templates)
+  in 1.8.0 — are all additive, so an older Reader simply ignores what it does not recognise.
+  1.3.0 added no on-disk field. 1.6.0 adds no new manifest
   key or note/side-file field either, but it does newly permit the `.jsonc` data-file extension
   (see [§8](#8-reading-and-writing)): such files MAY contain comments that a Reader **MUST** strip,
   so — unlike the additive fields above — a comment-bearing `.jsonc` file requires a JSONC-aware
@@ -600,7 +601,9 @@ Named shapes referenced by `chord.id` and `handshape.chord_id`:
   "arp": false,
   "fingers": [-1, 2, 1, -1, -1, -1],
   "frets":   [ 0, 2, 2,  0,  0,  0],
-  "voicing": "open"
+  "voicing": "open",
+  "caged": "E",
+  "guideTones": [3, 10]
 }
 ```
 
@@ -612,6 +615,8 @@ Named shapes referenced by `chord.id` and `handshape.chord_id`:
 | `fingers` | int[] | all `-1` | Fretting-hand fingers, lowest string first. `-1` = unused, `0` = open / no finger, `1..4` = index/middle/ring/pinky. Length matches the string count. |
 | `frets` | int[] | all `-1` | Fret numbers, lowest string first. `-1` = unused, `0` = open, positive = fretted. |
 | `voicing` | string | `""` | OPTIONAL voicing type of the shape (1.7.0) — e.g. `"open"`, `"triad"`, `"shell"`, `"drop2"`, `"drop3"`, `"barre"`. A **teaching annotation** (display only — a grader **MUST NOT** score it); free-form, but a Writer SHOULD prefer the listed tokens. It describes the key-independent shape, which is why it lives on the template rather than the chord instance (cf. [`fn`](#631-harmonic-function-fn)). |
+| `caged` | string | `""` | OPTIONAL CAGED-system shape (1.8.0) the fingering derives from — one of `"C"`, `"A"`, `"G"`, `"E"`, `"D"`. A **teaching annotation** (display only — a grader **MUST NOT** score it). Like `voicing`, it describes the key-independent shape, so it rides the template. |
+| `guideTones` | int[] | `[]` | OPTIONAL guide tones (1.8.0) — chromatic semitone offsets `0`–`11` above the chord **root** marking the tones that most define the chord's quality (typically the 3rd and 7th); e.g. a dominant-7 → `[4, 10]` (major 3rd, minor 7th). A **teaching annotation** (display only — a grader **MUST NOT** score it). Root-relative, hence key-independent, so it rides the template. |
 
 ### 6.7. Phrases (OPTIONAL — multi-difficulty data)
 

@@ -28,6 +28,6 @@
   "templates": [
     {"name": "Em", "displayName": "Em", "arp": false,
      "fingers": [-1, 2, 1, -1, -1, -1], "frets": [0, 2, 2, 0, 0, 0],
-     "voicing": "open"}
+     "voicing": "open", "caged": "E", "guideTones": [3]}
   ]
 }

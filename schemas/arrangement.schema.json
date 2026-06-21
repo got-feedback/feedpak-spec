@@ -122,7 +122,12 @@
         "arp": { "type": "boolean" },
         "fingers": { "type": "array", "items": { "type": "integer" } },
         "frets": { "type": "array", "items": { "type": "integer" } },
-        "voicing": { "type": "string" }
+        "voicing": { "type": "string" },
+        "caged": { "type": "string", "enum": ["C", "A", "G", "E", "D"] },
+        "guideTones": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 11 }
+        }
       }
     },
     "phrase": {

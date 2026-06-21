@@ -20,6 +20,24 @@ relate.
   caveats — comments are the only relaxation (no trailing commas / JSON5), and a comment-bearing
   `.jsonc` needs a JSONC-aware reader, so keep distributed packs as comment-free `.json`.
 
+## [1.8.0] - 2026-06-21
+
+Additive (MINOR) release: the two deferred per-chord harmony descriptors from the §6.3.1 FEP.
+Backward-compatible — a 1.0.0 pack is also a valid 1.8.0 pack, and older readers ignore the new
+optional fields.
+
+### Added
+- **Chord-template harmony descriptors** ([spec §6.6](spec/feedpak-v1.md#66-chord-templates)): two
+  OPTIONAL template fields that annotate the chord shape for teaching/display, never grading (the
+  **honesty rule** — a grader MUST NOT score them) — `caged` (the CAGED-system shape the fingering
+  derives from: one of `C`/`A`/`G`/`E`/`D`) and `guideTones` (chromatic semitone offsets `0`–`11`
+  above the chord **root** marking the quality-defining tones, typically the 3rd and 7th, e.g. a
+  dominant-7 → `[4, 10]`). Both are key-independent shape properties, so they ride the template
+  alongside `voicing`. Schema: `caged` (enum) + `guideTones` (int array) on `$defs/template` in
+  [`schemas/arrangement.schema.json`](schemas/arrangement.schema.json); exercised by the extended
+  example (the Em template → `caged: "E"`, `guideTones: [3]`). Completes the §6.3.1 FEP, whose
+  `caged`/`guideTones` were deferred in 1.7.0.
+
 ## [1.7.0] - 2026-06-21
 
 Additive (MINOR) release: per-chord harmony annotations. Backward-compatible — a 1.0.0 pack is also
@@ -188,7 +206,8 @@ Initial public release of the feedpak format specification.
 - Repository governance: README, CONTRIBUTING (DCO + enhancement-proposal process),
   GOVERNANCE, CODE_OF_CONDUCT, and dual CC0/MIT licensing.
 
-[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.4.0...v1.5.0
