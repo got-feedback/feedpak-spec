@@ -37,14 +37,21 @@ def test_minimal_example_is_not_pinned_to_current():
     assert "minimal example" not in cv.collect()
 
 
-def test_section_slice_is_bounded():
+def test_section_slice_excludes_minimal_example():
     text = (ROOT / "spec" / "feedpak-v1.md").read_text(encoding="utf-8")
+    # The end marker must actually exist, so the slice is genuinely bounded and not a
+    # rest-of-document fallback (which could swallow the §5 minimal example).
+    assert "### 4.2." in text
     section = cv._section(text, "### 4.1.", "### 4.2.")
-    assert "### 4.1." in section
-    assert "### 4.2." not in section          # stops before the next heading
-    # The §5 minimal-manifest example (1.0.0) is outside the slice, so it can't
-    # be mistaken for a current-version mismatch.
-    assert section.count("feedpak_version:") >= 1
+    assert section.startswith("### 4.1.")
+    assert "### 4.2." not in section
+    # The §5 minimal-manifest example pins `feedpak_version: "1.0.0"`; it MUST be outside
+    # the §4.1 slice, or the guard would read it as a current-version mismatch.
+    assert 'feedpak_version: "1.0.0"' not in section
+    # Every `feedpak_version` the slice *does* contain is the current (header) version.
+    header = cv._SPEC_HEADER_RE.search(text).group(1)
+    hits = cv._FEEDPAK_VERSION_RE.findall(section)
+    assert hits and all(v == header for v in hits)
 
 
 def test_regexes_match_real_files():
