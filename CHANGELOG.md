@@ -12,10 +12,12 @@ relate.
 
 ## [1.6.0] - 2026-06-21
 
-Additive (MINOR) release: the `.jsonc` data-file extension (comment-annotated JSON), plus a
-docs-site version banner. No existing pack is affected — but note that a `.jsonc` file that
-actually contains comments requires a JSONC-aware Reader (a strict-JSON-only Reader cannot read
-it); see the JSONC bullet below.
+MINOR release under the new §4.2 *opt-in file-format relaxation* carve-out: the `.jsonc`
+data-file extension (comment-annotated JSON), plus a docs-site version banner. No existing pack is
+affected, and a comment-free `.jsonc` file is plain JSON — but a `.jsonc` file that actually
+contains comments is **not** readable by a strict-JSON-only Reader; it requires a JSONC-aware
+Reader. This is why `.jsonc` ships under an explicit, bounded carve-out rather than the ordinary
+"older Readers keep working" minor rule (see the JSONC bullet below and spec §4.2 / §8).
 
 ### Added
 - Docs site (no format change): a build-time version banner. The site now stamps the newest
@@ -30,11 +32,11 @@ it); see the JSONC bullet below.
   extension to signal that they contain comments; Readers strip comments before parsing, and
   Writers SHOULD preserve them on round-trip. Only comments are permitted — trailing commas and
   other JSON5-style relaxations are not; after comment removal a `.jsonc` file MUST be strict JSON.
-  The reference validator (`tools/validate.py`) parses `.jsonc` files accordingly. This is an
-  additive MINOR change: no existing pack is affected. A comment-free `.jsonc` file is plain JSON,
-  but a `.jsonc` file that contains comments is readable only by Readers that implement the
-  comment-stripping step (a plain JSON parser errors on `//`), so a Writer needing maximum
-  reader compatibility SHOULD keep data files as comment-free `.json`.
+  The reference validator (`tools/validate.py`) parses `.jsonc` files accordingly. Shipped as a
+  MINOR bump under the §4.2 opt-in-relaxation carve-out: no existing pack is affected, and a
+  comment-free `.jsonc` file is plain JSON, but a `.jsonc` file that contains comments is readable
+  only by Readers that implement the comment-stripping step (a plain JSON parser errors on `//`),
+  so a Writer needing maximum reader compatibility SHOULD keep data files as comment-free `.json`.
 
 ## [1.5.0] - 2026-06-21
 

@@ -186,6 +186,20 @@ Changes to the format are released under semver semantics, applied to `feedpak_v
 without bumping the **major** version. Additive changes (new optional keys/files) **MUST** be
 released as a **minor** bump and **MUST** be safe for an older Reader to ignore.
 
+**Carve-out: opt-in file-format relaxations.** One narrow class of change is released as a
+**minor** bump even though an older Reader cannot transparently ignore it: an *opt-in relaxation
+of how a data file is encoded* that a pack uses only if it chooses to. The sole such relaxation in
+this document is the [`.jsonc` extension](#8-reading-and-writing) (1.6.0), whose files may contain
+comments a Reader **MUST** strip. The justification for keeping it minor rather than major is that
+it is **strictly opt-in and per-file**: a pack that does not adopt `.jsonc` — and a `.jsonc` file
+that contains no comments — is byte-for-byte ordinary JSON that every Reader handles. Only a pack
+that *actually uses* the relaxation requires a Reader supporting the minor version that introduced
+it. This is therefore an explicit, bounded exception to the "older Readers keep working by ignoring
+them" rule above, **not** a general license to add un-ignorable changes under a minor bump; any
+future relaxation of this kind **MUST** be opt-in and per-file in the same way, or else be released
+as a **major** bump. A Writer that needs maximum Reader compatibility **SHOULD NOT** rely on the
+relaxation (for `.jsonc`: keep data files as comment-free `.json`).
+
 ### 4.3. Side-file schema versions
 
 Several side-files carry their own integer `version` field at their top level
@@ -984,15 +998,17 @@ valid JSON. A Writer that preserves edits to a `.jsonc` file **SHOULD** leave th
 intact. For new hand-edited packs, Writers **MAY** write `.jsonc` data files and **MAY** include
 comments in them.
 
-Note on compatibility. Two facts must be kept separate, and this differs from the additive *field*
-changes governed by [§4.2](#42-compatibility-policy):
+Note on compatibility. `.jsonc` is governed by the **opt-in file-format relaxation carve-out** in
+[§4.2](#42-compatibility-policy), not by the ordinary "older Readers keep working by ignoring them"
+rule. Two facts must be kept separate:
 
 1. **No existing pack breaks.** Packs that do not adopt `.jsonc` are entirely unchanged, and a
    comment-free `.jsonc` file is byte-for-byte valid JSON.
 2. **A `.jsonc` file that actually contains comments is NOT readable by a strict-JSON-only
    Reader** — such a Reader errors on `//` and `/* */`. Only a Reader that implements the
-   comment-stripping step above can read it. Unlike the optional fields of §4.2, comments cannot
-   be safely *ignored* by an unaware Reader.
+   comment-stripping step above can read it. Unlike the optional fields added under a normal minor
+   bump, comments cannot be safely *ignored* by an unaware Reader — which is exactly why §4.2 lists
+   this as a bounded, opt-in exception.
 
 A Writer that needs a pack to be readable by the broadest range of Readers therefore **SHOULD**
 keep its data files as comment-free `.json`.
