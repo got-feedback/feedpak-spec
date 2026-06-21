@@ -63,6 +63,7 @@ SIDE_FILE_SCHEMAS = {
     "drum_tab": "drum-tab.schema.json",
     "vocal_pitch_contour": "vocal-pitch-contour.schema.json",
     "keys": "keys.schema.json",
+    "harmony": "harmony.schema.json",
 }
 NON_JSON_POINTERS = ("cover", "preview")
 

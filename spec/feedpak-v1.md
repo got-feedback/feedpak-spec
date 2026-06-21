@@ -7,7 +7,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.9.0
+- **Specification version:** 1.10.0
 - **Format major version:** 1
 - **Status:** Draft
 - **Date:** 2026-06-21
@@ -145,11 +145,11 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.9.0"
+feedpak_version: "1.10.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.9.0"`. (The optional fields added since 1.0.0 —
+  `feedpak_version: "1.10.0"`. (The optional fields added since 1.0.0 —
   [`authors`](#54-authors) in 1.1.0; the song-level [`tempos`](#74-song_timelinejson) /
   [`time_signatures`](#74-song_timelinejson) plus the per-arrangement
   [`tempos`](#610-per-arrangement-tempo-optional) override in 1.2.0; the per-note bend shape
@@ -167,7 +167,9 @@ feedpak_version: "1.9.0"
   [`codec`](#53-stems) hint and broadens audio beyond OGG behind a MUST-decode baseline; a pack
   that stays within the baseline is unaffected, while one that carries a non-baseline stem
   format requires a Reader that supports it — the same opt-in shape as `.jsonc`, per the
-  [§4.2 carve-out](#42-compatibility-policy).)
+  [§4.2 carve-out](#42-compatibility-policy). 1.10.0 adds the optional song-level
+  [`harmony`](#78-harmonyjson) side-file (intended chord progression) — additive, an older Reader
+  simply ignores the manifest key and file.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
@@ -301,6 +303,7 @@ stems:
 | `song_timeline` | string (path) | no | Path to a song-wide beats/sections file (see [§7.4](#74-song_timelinejson)). Takes priority over beats/sections embedded in arrangement JSON. |
 | `drum_tab` | string (path) | no | Path to a drum-tab file (see [§7.5](#75-drum_tabjson)). |
 | `keys` | string (path) | no | Path to a key/scale-annotation file (see [§7.7](#77-keysjson)). |
+| `harmony` | string (path) | no | Path to a song-level harmony track (intended chord progression; see [§7.8](#78-harmonyjson)). |
 
 Any key not listed here is an **extension key** and **MUST** be ignored by Readers that do not
 understand it (see [§9](#9-extending-the-format)).
@@ -623,9 +626,15 @@ half-specified function is ambiguous. `fn` describes the chord's **as-played** f
 key active at its time (see [`keys.json`](#77-keysjson)), so a Reader **MAY** compute it and a
 Writer **MAY** omit it; when present it is a cached value or an author override. It lives on the
 chord **instance** (§6.3), not the [template](#66-chord-templates) — the same shape is reused across
-keys, so its function is not a property of the shape. A future song-level *harmony track* would
-instead carry the song's **intended** chord progression; `fn` describes each chord as actually
-voiced, and the two are deliberately distinct.
+keys, so its function is not a property of the shape. The song-level *harmony track*
+([`harmony.json`](#78-harmonyjson)) instead carries the song's **intended** chord progression;
+`fn` describes each chord as actually voiced, and the two are deliberately distinct (a Reader MAY
+derive one from the other, but neither is authoritative).
+
+The `q` token is drawn from a **shared chord-quality vocabulary** — a recommended (not closed) set
+including `"maj"`, `"min"`, `"maj7"`, `"m7"`, `"7"`, `"m7b5"`, `"dim"`, `"aug"`, `"sus2"`,
+`"sus4"`, `"6"`, `"9"`, … — the same set [`harmony.json`'s `quality`](#78-harmonyjson) uses, so the
+two stay interoperable.
 
 ### 6.4. Anchors
 
@@ -1072,6 +1081,57 @@ Each entry applies until the next:
 > drums-only, or stems-only pack uses `keys.json` to tell the player "the song is in Em, then
 > changes to G major at 64.5 s" with no keyboard part anywhere in the package. The `keys` manifest
 > pointer (this file) and the `keys` instrument hint are unrelated.
+
+---
+
+### 7.8. `harmony.json`
+
+Referenced by the manifest `harmony` key — the song's **intended chord progression**: the chords
+the song *is*, independent of what any one arrangement plays. This is the reference/teaching
+track a fretboard-theory overlay, a "chords" lyric line, or a practice-along reads; a simplified
+or solo arrangement won't carry it per-chord, so it lives once at the song level. Time-ordered
+events, each applying until the next (the same shape as [`keys.json`](#77-keysjson)):
+
+```json
+{
+  "version": 1,
+  "events": [
+    {"t": 0.0, "root": "G",  "quality": "maj7", "rn": "I"},
+    {"t": 2.0, "root": "E",  "quality": "m7",   "rn": "vi", "bass": "G"},
+    {"t": 4.0, "root": "C",  "quality": "maj7", "rn": "IV"},
+    {"t": 6.0, "root": null}
+  ]
+}
+```
+
+| Field | Type | Req | Meaning |
+|---|---|---|---|
+| `t` | number | **yes** | Event time (s); applies until the next event (matches `keys.json`'s `t`). |
+| `root` | string \| null | — | Chord root note name — `"G"`, `"F#"`, `"Bb"` (same note-name convention as `keys.json`'s `key`). **`null` marks a no-chord (N.C.) event** — a rest/breakdown with no harmony until the next event; without it the apply-until-next rule would wrongly sustain the previous chord. Omitting `root` entirely is equivalent to `null`. |
+| `quality` | string | — | Quality token (e.g. `"maj7"`, `"m7"`, `"7"`, `"dim"`, `"sus4"`). Drawn from the **shared chord-quality vocabulary** (see [§6.3.1](#631-harmonic-function-fn)); the set is recommended, not closed. |
+| `rn` | string | — | Roman numeral relative to the active [`keys.json`](#77-keysjson) key, for display (like `fn.rn`). **Meaningful only when a key is active at this `t`** — omit it when `keys.json` is absent or has no event covering this time. |
+| `bass` | string | — | Slash-chord bass note when different from `root` (e.g. `G/B` → `root: "G"`, `bass: "B"`). |
+
+**Spelling.** `root` and `bass` **SHOULD** follow the active key's spelling convention (e.g. `Bb`
+in F major, `A#` in B major) so a derived `rn`/notation reads correctly; the absolute spelling is
+authoritative and the relative view is derived from it.
+
+**Relationship to `fn`.** `harmony.json` is the song's *intended* progression (one per song,
+reference data); per-chord [`fn`](#631-harmonic-function-fn) is the *as-played* function on a
+specific arrangement's chords. They may agree or deliberately diverge (a simplified arrangement
+plays a subset). A Reader **MAY** derive `fn` from `harmony.json` + the played chord, but neither
+is authoritative over the other.
+
+**No voicing.** `harmony.json` is abstract harmony only — it carries no fingering and does **not**
+index the arrangement [chord templates](#66-chord-templates); voicings are an arrangement concern.
+
+**Honesty rule.** The harmony track is reference/teaching data: a renderer/teacher **MAY** display
+it; a grader **MUST NOT** use it to score the player's notes. (A backing engine that *plays* the
+progression is a separate, dependent proposal, not part of this track.)
+
+> **Note — repeats are flattened.** Events are a flat, time-ordered list, so a progression that
+> recurs (e.g. a chorus) is repeated in full at each occurrence — the same tradeoff `keys.json`
+> and `song_timeline.json` make. A section-relative encoding is out of scope for this version.
 
 ---
 

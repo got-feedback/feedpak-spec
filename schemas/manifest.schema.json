@@ -42,7 +42,8 @@
     "preview": { "$ref": "#/$defs/relpath" },
     "song_timeline": { "$ref": "#/$defs/relpath" },
     "drum_tab": { "$ref": "#/$defs/relpath" },
-    "keys": { "$ref": "#/$defs/relpath" }
+    "keys": { "$ref": "#/$defs/relpath" },
+    "harmony": { "$ref": "#/$defs/relpath" }
   },
   "$defs": {
     "semver": {

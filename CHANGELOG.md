@@ -20,6 +20,26 @@ relate.
   caveats — comments are the only relaxation (no trailing commas / JSON5), and a comment-bearing
   `.jsonc` needs a JSONC-aware reader, so keep distributed packs as comment-free `.json`.
 
+## [1.10.0] - 2026-06-21
+
+Additive (MINOR) release: a song-level harmony track. Backward-compatible — a 1.0.0 pack is also a
+valid 1.10.0 pack, and older readers ignore the new optional manifest key + side-file.
+
+### Added
+- **Song-level harmony track — `harmony.json`** ([spec §7.8](spec/feedpak-v1.md#78-harmonyjson),
+  manifest `harmony` key): the song's **intended** chord progression (the chords the song *is*,
+  independent of what any arrangement plays) — reference/teaching data for fretboard-theory
+  overlays, chord lyric lines, and practice-alongs. Time-ordered events applying until the next
+  (same shape as `keys.json`): `t` (required), `root` (absolute note name; **`null` marks a
+  no-chord/N.C. event**), `quality`, `rn` (Roman numeral relative to the active `keys.json` key,
+  omitted when no key is active), and `bass` (slash-chord bass). Voicing-free (does not index
+  arrangement chord templates) and **honesty-ruled** — a grader MUST NOT score against it. Defined
+  as distinct from per-chord `fn` (as-played function): a Reader MAY derive one from the other, but
+  neither is authoritative. `quality`/`fn.q` now reference a shared (recommended, not closed)
+  chord-quality vocabulary so they stay interoperable. Schema:
+  [`schemas/harmony.schema.json`](schemas/harmony.schema.json); exercised by the extended example
+  (an Em→C→G→D7/F#→N.C. progression aligned to its Em/G `keys.json`). Implements #28.
+
 ## [1.9.0] - 2026-06-21
 
 Additive (MINOR) release: audio stem formats beyond OGG. Backward-compatible — every existing
@@ -233,7 +253,8 @@ Initial public release of the feedpak format specification.
 - Repository governance: README, CONTRIBUTING (DCO + enhancement-proposal process),
   GOVERNANCE, CODE_OF_CONDUCT, and dual CC0/MIT licensing.
 
-[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/got-feedback/feedpak-spec/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/got-feedback/feedpak-spec/compare/v1.6.0...v1.7.0
