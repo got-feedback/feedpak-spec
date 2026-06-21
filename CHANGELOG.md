@@ -42,9 +42,10 @@ portable pack.
 
 ### Changed
 - **§4.2 compatibility carve-out** now lists two opt-in file-format relaxations — the existing
-  `.jsonc` extension and (new) non-baseline audio stem formats — both kept MINOR on the same
-  "strictly opt-in, per-file; only a pack that actually uses it needs a supporting Reader"
-  justification.
+  `.jsonc` extension and (new) audio stem formats beyond OGG (1.9.0 widens the baseline
+  OGG→OGG+WAV and allows formats above it; since OGG was the only pre-1.9.0 guarantee, even a
+  baseline WAV-only pack needs a 1.9.0 Reader) — both kept MINOR on the same "strictly opt-in,
+  per-file; only a pack that actually uses it needs a supporting Reader" justification.
 
 ## [1.8.0] - 2026-06-21
 
