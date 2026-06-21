@@ -121,10 +121,11 @@ my-song.feedpak/
 - **Field names** in hot-path data (notes, chords, hits, beats) are deliberately short because
   they may be repeated tens of thousands of times in one file. Writers **MUST NOT** expand
   them. One-off metadata MAY use long, descriptive names.
-- **Audio stems** default to OGG (Vorbis) at a quality around `-q:a 5` (size/fidelity balance),
-  which is the **baseline format every Reader MUST decode**. Other formats MAY be carried and are
-  dispatched by file extension; see [§5.3](#53-stems) for the decoder baseline and portability
-  rule. **Cover art** is JPEG or PNG, conventionally square, 500–1500 px on a side.
+- **Audio stems** default to OGG (Vorbis) at a quality around `-q:a 5` (size/fidelity balance).
+  OGG and WAV together form the **baseline every Reader MUST decode**; other formats MAY be
+  carried and are dispatched by file extension; see [§5.3.2](#532-audio-formats--baseline-dispatch-and-portability)
+  for the full decoder baseline and portability rule. **Cover art** is JPEG or PNG, conventionally
+  square, 500–1500 px on a side.
 - **Unknown keys / files / fields** are reserved for forward-compatibility. Readers **MUST**
   ignore them rather than error, and Writers that copy or re-emit a feedpak **SHOULD** preserve
   them verbatim.
@@ -290,7 +291,7 @@ stems:
 | `pitch_extraction` | object | no | Provenance metadata when vocal pitch was extracted by an automated engine. See [§7.2.1](#721-pitch_extraction). |
 | `vocal_pitch_contour` | string (path) | no | Path to a fine-grained pitch-contour JSON (see [§7.3](#73-vocal_pitch_contourjson)). |
 | `cover` | string (path) | no | Path to cover image (JPEG/PNG). |
-| `preview` | string (path) | no | Path to a short preview audio clip (OGG) for hover-to-listen UIs. |
+| `preview` | string (path) | no | Path to a short preview audio clip for hover-to-listen UIs. Same audio-format rules as stems ([§5.3.2](#532-audio-formats--baseline-dispatch-and-portability)) — OGG/WAV baseline, other formats allowed behind it. |
 | `song_timeline` | string (path) | no | Path to a song-wide beats/sections file (see [§7.4](#74-song_timelinejson)). Takes priority over beats/sections embedded in arrangement JSON. |
 | `drum_tab` | string (path) | no | Path to a drum-tab file (see [§7.5](#75-drum_tabjson)). |
 | `keys` | string (path) | no | Path to a key/scale-annotation file (see [§7.7](#77-keysjson)). |
@@ -354,13 +355,39 @@ typically has a single `{id: full, file: stems/full.ogg}` entry; after stem spli
 is commonly replaced by per-instrument entries (`guitar`, `bass`, `drums`, `vocals`, `other`,
 `piano`, …). No entry is guaranteed to be present beyond the non-empty requirement.
 
+#### 5.3.1. `stem_separation`
+
+When stems were produced by an automated source-separation engine, an OPTIONAL top-level
+`stem_separation` object records the provenance:
+
+```yaml
+stem_separation:
+  engine: demucs           # stable engine id
+  model: htdemucs_6s       # engine-specific model name
+  version: "1.0.0"         # semver for the stem-artifact contract
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `engine` | string | Stable identifier for the separation engine. |
+| `model` | string | Engine-specific model id used for this split. |
+| `version` | string (semver) | Version of the producer's stem-artifact contract, independent of the upstream engine version. Bump: patch = metadata-only, minor = backward-compatible additions, major = stem set / packaging / post-processing changed and existing splits should be regenerated. |
+
+Omitted for single-stem packs and for hand-recorded or hand-edited stems. The three fields
+together form a natural cache key: a consumer regenerating stems can treat any change among
+them as a cache miss.
+
 #### 5.3.2. Audio formats — baseline, dispatch, and portability
 
-A stem's audio format is **dispatched by file extension** (matching the hand-editable
-filename-convention ethos of [§1](#1-conventions)); the optional `codec` field above is only a
-disambiguation hint for when an extension does not determine the codec. A Reader decodes the
-formats it supports and, for one it does not, **MUST** surface a clear error or fall back to
-another stem — it **MUST NOT** fail silently into dead air.
+**Codec resolution (precedence).** A Reader determines a stem's codec in this order:
+
+1. the explicit [`codec`](#53-stems) field, if present (it **overrides** the extension); else
+2. the file extension (`.ogg` → Vorbis, `.opus` → Opus, `.wav` → PCM, `.mp3` → MP3, `.flac` → FLAC).
+
+`codec` exists precisely for the cases where the extension is ambiguous or doesn't pin the codec
+(a container that can hold more than one codec). A Reader decodes the formats it supports; for one
+it does not, it **MUST** surface a clear error or fall back to another stem — it **MUST NOT** fail
+silently into dead air.
 
 **Decoder baseline.** A conformant Reader **MUST** decode:
 
@@ -384,28 +411,6 @@ a decoder for Wwise `.wem`) — but such formats are **NOT** part of the baselin
 the only stem in a distributable pack (the portability rule still applies), and this document
 ships **no** reference decoder for them. Relying on a non-recommended format makes a pack
 playable only on Readers that opted into it.
-
-#### 5.3.1. `stem_separation`
-
-When stems were produced by an automated source-separation engine, an OPTIONAL top-level
-`stem_separation` object records the provenance:
-
-```yaml
-stem_separation:
-  engine: demucs           # stable engine id
-  model: htdemucs_6s       # engine-specific model name
-  version: "1.0.0"         # semver for the stem-artifact contract
-```
-
-| Field | Type | Notes |
-|---|---|---|
-| `engine` | string | Stable identifier for the separation engine. |
-| `model` | string | Engine-specific model id used for this split. |
-| `version` | string (semver) | Version of the producer's stem-artifact contract, independent of the upstream engine version. Bump: patch = metadata-only, minor = backward-compatible additions, major = stem set / packaging / post-processing changed and existing splits should be regenerated. |
-
-Omitted for single-stem packs and for hand-recorded or hand-edited stems. The three fields
-together form a natural cache key: a consumer regenerating stems can treat any change among
-them as a cache miss.
 
 ### 5.4. `authors[]`
 

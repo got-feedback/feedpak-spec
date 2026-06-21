@@ -40,7 +40,8 @@ The design rests on three ideas, spelled out in the spec:
 
 1. **The manifest is the index.** Nothing is discovered by scanning filenames — every file
    is referenced from `manifest.yaml`.
-2. **Plain-text first.** YAML for the hand-edited manifest, JSON for data. Audio is OGG.
+2. **Plain-text first.** YAML for the hand-edited manifest, JSON for data. Audio is OGG/WAV by
+   default (the decode baseline), with MP3/FLAC/Opus allowed behind it.
 3. **Extensible without breaking readers.** New data is a new side-file plus a new manifest
    key; older readers ignore what they don't recognise.
 
