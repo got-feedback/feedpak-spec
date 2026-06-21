@@ -62,6 +62,13 @@ Prefer additive (minor) changes. If you find yourself proposing a major bump, ch
 whether the goal can be met with a new optional key instead — that is almost always the better
 design and is how every extension so far has shipped.
 
+When you do bump, the version string lives in several places that **must** all match, and CI
+enforces it (`tools/check_versions.py`, in the lint job): the spec header, the §4.1
+`feedpak_version` example + writer-SHOULD line, the README version table and citation, the
+`examples/extended.feedpak` manifest, and the newest `## [X.Y.Z]` heading in `CHANGELOG.md`.
+Update them together; the guard prints exactly which one is out of step if you miss any.
+(The `examples/minimal.feedpak` manifest deliberately stays at `1.0.0` and is not checked.)
+
 ## Workflow
 
 - Never push directly to `main`. Branch, then open a PR against

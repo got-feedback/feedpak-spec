@@ -10,6 +10,13 @@ relate.
 
 ## [Unreleased]
 
+### Changed
+- CI (no format change): the version-consistency guard (`tools/check_versions.py`) now covers
+  every place the current version is written — the spec header, the §4.1 `feedpak_version`
+  example + writer-SHOULD line, the README table **and** citation, and the extended example
+  manifest, in addition to the newest `CHANGELOG.md` version. A missed spot during a bump now
+  fails CI with a precise diff instead of drifting silently.
+
 ## [1.6.0] - 2026-06-21
 
 MINOR release under the new §4.2 *opt-in file-format relaxation* carve-out: the `.jsonc`
