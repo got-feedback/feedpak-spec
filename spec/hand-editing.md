@@ -339,6 +339,18 @@ For example, to annotate a `song_timeline.jsonc` with section markers:
 Then update the manifest pointer from `song_timeline: song_timeline.json` to
 `song_timeline: song_timeline.jsonc`. Everything else stays the same.
 
+Two things to keep in mind:
+
+- **Comments are the only thing JSONC adds.** Trailing commas, single-quoted strings, and other
+  JSON5-style shortcuts are *not* allowed — once the comments are stripped, the file still has to
+  be valid JSON. (A trailing comma is the easy mistake to make if you're used to editing JSONC
+  elsewhere.)
+- **Comments mean the file needs a JSONC-aware reader.** A `.jsonc` file that actually contains
+  comments can only be opened by a reader that understands the extension; a strict-JSON-only reader
+  will choke on `//` and `/* */`. So treat comments as notes for your own working copy — if you
+  plan to share or distribute the pack, keep its data files as comment-free `.json`. (A
+  comment-free `.jsonc` file is just JSON with a different name, so it's always safe.)
+
 ## Out of scope (for now)
 
 - **Authoring a pack from scratch** (no source file to convert) — more of a developer task. Start

@@ -16,6 +16,9 @@ relate.
   example + writer-SHOULD line, the README table **and** citation, and the extended example
   manifest, in addition to the newest `CHANGELOG.md` version. A missed spot during a bump now
   fails CI with a precise diff instead of drifting silently.
+- Docs (no format change): the hand-editing guide's `.jsonc` section now spells out the two
+  caveats — comments are the only relaxation (no trailing commas / JSON5), and a comment-bearing
+  `.jsonc` needs a JSONC-aware reader, so keep distributed packs as comment-free `.json`.
 
 ## [1.7.0] - 2026-06-21
 
