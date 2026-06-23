@@ -105,7 +105,7 @@ my-song.feedpak/
 3. **YAML for the manifest, JSON (or JSONC) for data files.** The manifest is YAML so it is
    comfortable to hand-edit; all structured data files are JSON (or JSONC, where the `.jsonc`
    extension signals that the file MAY contain `//` line comments and `/* */` block comments).
-   A YAML manifest is, by [YAML 1.2](https://yaml.org/spec/1.2.2/) rules, valid against the
+   A YAML manifest is, by [YAML 1.2](https://spec.yaml.io/main/spec/1.2.2/) rules, valid against the
    JSON-Schema definitions in [`schemas/`](../schemas/) (YAML is a JSON superset for this
    purpose).
 
@@ -1345,6 +1345,6 @@ the sole normative artifact, and the byte-for-byte layout of any wire protocol i
 - [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) — Key words for use in RFCs.
 - [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) — Ambiguity of uppercase vs lowercase.
 - [Semantic Versioning 2.0.0](https://semver.org/).
-- [YAML 1.2.2](https://yaml.org/spec/1.2.2/).
+- [YAML 1.2.2](https://spec.yaml.io/main/spec/1.2.2/).
 - [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema).
 - [General MIDI percussion key map](https://en.wikipedia.org/wiki/General_MIDI#Percussion) (drum piece-id GM mapping).
