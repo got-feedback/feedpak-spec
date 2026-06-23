@@ -88,7 +88,9 @@ my-song.feedpak/
 │   ├── drums.ogg
 │   ├── vocals.ogg
 │   └── other.ogg
-├── lyrics.json               # OPTIONAL — syllable-level lyrics
+├── lyrics.json               # OPTIONAL — syllable-level lyrics (the primary track)
+├── lyrics_romaji.json        # OPTIONAL — transliteration / translation tracks (lyric_tracks, §5.5)
+├── lyrics_en.json
 └── cover.jpg                 # OPTIONAL — album art
 ```
 
