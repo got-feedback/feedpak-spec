@@ -32,8 +32,9 @@ my-song.feedpak/
 │   └── lead.json             # note/chord data per arrangement
 ├── stems/
 │   └── full.ogg              # audio
-├── lyrics.json               # optional side-files, each opted-in from the manifest
-├── lyrics_en.json            # extra lyric tracks (transliteration / translation) — see lyric_tracks
+├── lyrics.json               # optional side-files, each opted-in from the manifest (the primary lyric track)
+├── lyrics_romaji.json        # extra lyric tracks (transliteration / translation) — see lyric_tracks
+├── lyrics_en.json
 └── cover.jpg
 ```
 
