@@ -63,8 +63,8 @@
     },
     "bcp47": {
       "type": "string",
-      "pattern": "^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$",
-      "description": "BCP 47 (RFC 5646) language tag, validated leniently by shape rather than against the IANA registry (e.g. 'en', 'ja', 'ja-Latn', 'zh-Hans', 'pt-BR', 'und')."
+      "pattern": "^([A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*|[xiXI](-[A-Za-z0-9]{1,8})+)$",
+      "description": "BCP 47 (RFC 5646) language tag, validated leniently by shape rather than against the IANA registry (e.g. 'en', 'ja', 'ja-Latn', 'zh-Hans', 'pt-BR', 'und'). The second alternative admits well-formed private-use ('x-...') and irregular grandfathered ('i-klingon') tags with a single-letter primary subtag, which Readers MUST accept (spec §5.5)."
     },
     "lyricTrack": {
       "type": "object",
@@ -74,7 +74,11 @@
         "id": { "type": "string", "minLength": 1 },
         "file": { "$ref": "#/$defs/relpath" },
         "language": { "$ref": "#/$defs/bcp47" },
-        "kind": { "type": "string", "enum": ["original", "transliteration", "translation"] },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Track kind. Canonical values: 'original', 'transliteration', 'translation'. Kept open (not an enum) because the spec (§5.5) requires Readers to accept any value and treat an unrecognised one as 'translation', so future kinds must stay schema-valid."
+        },
         "lyrics_source": { "type": "string", "enum": ["authored", "transcribed", "user"] },
         "lyric_transcription": { "$ref": "#/$defs/provenance" },
         "stem": { "type": "string", "minLength": 1 },
