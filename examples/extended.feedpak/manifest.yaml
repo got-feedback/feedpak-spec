@@ -1,7 +1,7 @@
 # Extended feedpak exercising optional side-files: lyrics, vocal pitch,
 # song timeline, and a drum tab. See spec/feedpak-v1.md §5 and §7.
 # SPDX-License-Identifier: MIT
-feedpak_version: "1.12.0"
+feedpak_version: "1.13.0"
 title: "Extended Demo"
 artist: "Example Artist"
 album: "Spec Examples"
@@ -70,4 +70,5 @@ song_timeline: song_timeline.json
 drum_tab: drum_tab.json
 keys: keys.json
 harmony: harmony.json
+rigs: rigs.json          # engine-agnostic rig library (spec §7.8)
 cover: cover.png
