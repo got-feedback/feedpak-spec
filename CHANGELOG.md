@@ -10,6 +10,12 @@ relate.
 
 ## [Unreleased]
 
+### Changed
+- Docs (no format change): the §6.9 `tones.definitions` example now uses a neutral opaque
+  placeholder instead of a source-specific field name. `definitions` is unchanged — still defined
+  as raw, source-copied passthrough that Readers MUST preserve verbatim; only the illustrative
+  field names in the example were genericised.
+
 ## [1.12.0] - 2026-07-01
 
 Additive (MINOR) release: album-grouping and genre metadata. Backward-compatible — a 1.0.0
