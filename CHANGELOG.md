@@ -10,6 +10,28 @@ relate.
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-07-01
+
+Additive (MINOR) release: an engine-agnostic **rig model** so a feedpak can carry tone information
+natively — beyond the psarc-shaped, opaque `tones.definitions` passthrough.
+
+### Added
+- New optional side-file [`rigs.json`](spec/feedpak-v1.md#79-rigsjson) (§7.9) and manifest `rigs`
+  key: a pack-level library of rigs, each an ordered set of effect **blocks**. Every block splits
+  *what it is* (`intent`, engine-independent) from *how to render it* (`realizations` — an ordered
+  preference list over `nam` / `ir` / `plugin` / `builtin` engines, extensible to future ones). Open
+  `role`/`kind`/`engine` vocabularies, an open normalized `params` map with optional time
+  `automation`, and an optional `graph` for non-serial topology (parallel amps, wet/dry, stereo).
+  `schemas/rigs.schema.json`.
+- Arrangement [`tones`](spec/feedpak-v1.md#69-tones-optional) (§6.9) gains `base_rig` and
+  `changes[].rig`, referencing a rig `id` in `rigs.json`. The legacy opaque `tones.definitions`
+  passthrough is unchanged; a rig-aware Reader prefers the structured references.
+- `examples/extended.feedpak` now ships a `rigs.json` and a `tones` block that exercises it.
+
+### Compatibility
+- Purely additive. Older Readers ignore the `rigs` key, `rigs.json`, and the new `base_rig`/`rig`
+  fields, and still load. Nothing is removed, renamed, or repurposed.
+
 ## [1.12.0] - 2026-07-01
 
 Additive (MINOR) release: album-grouping and genre metadata. Backward-compatible — a 1.0.0
