@@ -7,7 +7,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.12.0
+- **Specification version:** 1.13.0
 - **Format major version:** 1
 - **Status:** Draft
 - **Date:** 2026-07-01
@@ -147,11 +147,11 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.12.0"
+feedpak_version: "1.13.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.12.0"`. (The optional fields added since 1.0.0 —
+  `feedpak_version: "1.13.0"`. (The optional fields added since 1.0.0 —
   [`authors`](#54-authors) in 1.1.0; the song-level [`tempos`](#74-song_timelinejson) /
   [`time_signatures`](#74-song_timelinejson) plus the per-arrangement
   [`tempos`](#610-per-arrangement-tempo-optional) override in 1.2.0; the per-note bend shape
@@ -160,7 +160,9 @@ feedpak_version: "1.12.0"
   [`sd`](#622-teaching-marks-fg-ch-sd) in 1.5.0; and the per-chord harmony annotations
   [`fn`](#631-harmonic-function-fn) / [`voicing`](#66-chord-templates) in 1.7.0; and the
   template harmony descriptors [`caged`](#66-chord-templates) / [`guideTones`](#66-chord-templates)
-  in 1.8.0 — are all additive, so an older Reader simply ignores what it does not recognise.
+  in 1.8.0; and the engine-agnostic rig library ([`rigs`](#79-rigsjson) side-file plus the
+  arrangement [`tones.base_rig`](#69-tones-optional) / [`tones.changes[].rig`](#69-tones-optional)
+  references) in 1.13.0 — are all additive, so an older Reader simply ignores what it does not recognise.
   1.3.0 added no on-disk field. 1.6.0 adds no new manifest
   key or note/side-file field either, but it does newly permit the `.jsonc` data-file extension
   (see [§8](#8-reading-and-writing)): such files MAY contain comments that a Reader **MUST** strip,
@@ -318,6 +320,7 @@ stems:
 | `drum_tab` | string (path) | no | Path to a drum-tab file (see [§7.5](#75-drum_tabjson)). |
 | `keys` | string (path) | no | Path to a key/scale-annotation file (see [§7.7](#77-keysjson)). |
 | `harmony` | string (path) | no | Path to a song-level harmony track (intended chord progression; see [§7.8](#78-harmonyjson)). |
+| `rigs` | string (path) | no | Path to an engine-agnostic rig library (amps/cabs/pedals as portable effect graphs; see [§7.9](#79-rigsjson)). |
 
 Any key not listed here is an **extension key** and **MUST** be ignored by Readers that do not
 understand it (see [§9](#9-extending-the-format)).
@@ -801,9 +804,10 @@ when the source carries no tone data.
 ```jsonc
 "tones": {
   "base": "Clean Rhythm",
+  "base_rig": "clean-rhythm",
   "changes": [
-    {"t": 12.5, "name": "Lead Drive"},
-    {"t": 48.0, "name": "Clean Rhythm"}
+    {"t": 12.5, "name": "Lead Drive", "rig": "lead-drive"},
+    {"t": 48.0, "name": "Clean Rhythm", "rig": "clean-rhythm"}
   ],
   "definitions": [
     {"name": "Clean Rhythm", "id": "tone-1", "gear": { /* opaque, source-specific gear data */ }}
@@ -811,12 +815,25 @@ when the source carries no tone data.
 }
 ```
 
-- `base` (string) — tone in effect before the first change.
-- `changes` (list, time-sorted) — `{"t": seconds, "name": str}` switches.
-- `definitions` (list) — raw, opaque tone objects copied from the source. Readers that do not
-  interpret gear **MUST** preserve `tones` verbatim.
+`tones` binds gear to time; the actual rigs are defined in one of two ways:
 
-All three sub-keys are individually OPTIONAL.
+1. **Structured, portable** — the [`rigs.json`](#79-rigsjson) library (§7.9). `base_rig` and each
+   `changes[].rig` reference a rig `id` there. This is the recommended, engine-agnostic
+   representation and the only one a Reader can portably render.
+2. **Legacy opaque** — `definitions`, a list of raw tone objects copied verbatim from the source
+   (e.g. an opaque object from an external source). It is source-specific and not portably interpretable; Readers that do
+   not interpret it **MUST** preserve `tones` verbatim.
+
+A pack MAY carry both; a rig-aware Reader **SHOULD** prefer the `rig`/`base_rig` references over
+`definitions`.
+
+- `base` (string) — human-readable name of the tone in effect before the first change.
+- `base_rig` (string, OPTIONAL) — rig `id` in [`rigs.json`](#79-rigsjson) for the base tone.
+- `changes` (list, time-sorted) — `{"t": seconds, "name": str, "rig"?: str}` switches. `rig`
+  references a rig `id` in [`rigs.json`](#79-rigsjson).
+- `definitions` (list, OPTIONAL) — raw, opaque tone objects copied from the source.
+
+All sub-keys are individually OPTIONAL.
 
 ### 6.10. Per-arrangement tempo (OPTIONAL)
 
@@ -1213,6 +1230,113 @@ progression is a separate, dependent proposal, not part of this track.)
 > **Note — repeats are flattened.** Events are a flat, time-ordered list, so a progression that
 > recurs (e.g. a chorus) is repeated in full at each occurrence — the same tradeoff `keys.json`
 > and `song_timeline.json` make. A section-relative encoding is out of scope for this version.
+
+### 7.9. `rigs.json`
+
+Referenced by the manifest `rigs` key — a **pack-level library of engine-agnostic rigs** (guitar
+/ bass tones as portable effect graphs). Arrangements bind rigs to time via
+[`tones.base_rig`](#69-tones-optional) / [`tones.changes[].rig`](#69-tones-optional) (§6.9), which
+reference a rig's `id` here. Rigs live pack-level (not per-arrangement) so one rig can be shared
+across arrangements and tone changes.
+
+This is the portable successor to the opaque, source-specific [`tones.definitions`](#69-tones-optional)
+passthrough. It is deliberately **not modelled on any one source or engine** (a
+single serial chain, a fixed gear catalog, or one plugin format): a rig is an ordered set
+of effect **blocks**, each of which separates *what it is* (`intent`, engine-independent) from *how
+to render it* (`realizations`, an ordered preference list).
+
+```jsonc
+{
+  "version": 1,
+  "rigs": [
+    {
+      "id": "lead-drive",          // referenced by tones.base_rig / changes[].rig
+      "name": "Lead Drive",
+      "instrument": "guitar",       // OPTIONAL hint
+      "channels": 1,                // OPTIONAL; default 1 (mono)
+      "blocks": [
+        {
+          "id": "amp",              // OPTIONAL; required only if referenced by `graph`
+          "role": "amp",            // open vocabulary (gain/drive/amp/cab/eq/delay/reverb/…)
+          "name": "British Hi-Gain",
+          "bypassed": false,        // OPTIONAL
+          "mix": 1.0,               // OPTIONAL wet/dry, 0..1
+          "intent": {               // engine-independent: what the block IS
+            "kind": "amp", "family": "british-hi-gain", "tags": ["crunch", "lead"]
+          },
+          "realizations": [         // ordered; reader renders the FIRST engine it supports
+            {"engine": "nam", "ref": "captures/british-higain.nam", "sha256": "…"},
+            {"engine": "plugin", "format": "clap", "id": "com.vendor.amp",
+             "name": "AmpX", "vendor": "Vendor", "state": "<base64>", "params": {"gain": 0.72}},
+            {"engine": "builtin", "id": "feedback.amp.tubestage.v1", "params": {"gain": 0.72}}
+          ],
+          "params": {"gain": 0.72, "bass": 0.5, "mid": 0.62, "treble": 0.58, "master": 0.5},
+          "automation": [           // OPTIONAL time-varying params
+            {"param": "gain", "points": [{"t": 48.0, "v": 0.72}, {"t": 60.0, "v": 0.85}]}
+          ]
+        }
+      ],
+      "graph": {                    // OPTIONAL; non-serial topology (parallel/stereo/wet-dry)
+        "nodes": ["input", "amp", "output"],
+        "edges": [["input", "amp"], ["amp", "output"]]
+      }
+    }
+  ]
+}
+```
+
+| Top-level field | Type | Notes |
+|---|---|---|
+| `version` | integer ≥ 1 | REQUIRED. Side-file schema version (independent of `feedpak_version`). |
+| `rigs` | array | REQUIRED. The rig library. |
+
+**Rig** (`rigs[]`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | REQUIRED. Stable id referenced by `tones.base_rig` / `changes[].rig`. |
+| `name` | string | OPTIONAL, human-readable. |
+| `instrument` | string | OPTIONAL hint (`guitar`, `bass`, …). Non-normative. |
+| `channels` | integer ≥ 1 | OPTIONAL. Channels the rig is authored for; default `1`. |
+| `blocks` | array | REQUIRED. Ordered serial signal chain (`input → blocks[0] → … → output`) unless `graph` overrides. |
+| `graph` | object | OPTIONAL. Explicit `{nodes, edges}` topology for non-serial rigs. |
+
+**Block** (`blocks[]`) — every field except at least one of `intent`/`realizations` is OPTIONAL:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | REQUIRED only if the block is referenced from `graph`. |
+| `role` | string | Open vocabulary (`gain`, `drive`, `amp`, `cab`, `eq`, `dynamics`, `modulation`, `delay`, `reverb`, `pitch`, `filter`, `utility`, …). Unknown values MUST be preserved. |
+| `name` | string | Human-readable. |
+| `bypassed` | boolean | Default `false`. |
+| `mix` | number 0..1 | Wet/dry mix; default `1`. |
+| `intent` | object | Engine-independent description — `kind`, `family`, `model` (non-normative hints), `tags`. Lets a Reader with no matching realization still display / approximate / remap the block. |
+| `realizations` | array | Ordered by preference. A Reader renders the **first** realization whose `engine` it supports; if it supports none, it falls back to `intent`. |
+| `params` | object | Open map of named controls: a number (normalized `0..1`), a string (discrete/enum), a boolean, or `{value, unit}` (e.g. `{"value": 320, "unit": "ms"}`). Not limited to any fixed knob set. |
+| `automation` | array | OPTIONAL. `{param, points: [{t, v}]}` lanes; time-sorted, value held to the next point. |
+
+**Realization** (`realizations[]`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `engine` | string | REQUIRED. Open vocabulary. Reserved: `nam` (Neural Amp Modeler capture), `ir` (impulse response), `plugin` (host plugin), `builtin` (host DSP by id). |
+| `ref` | string | For `nam`/`ir`: pack-relative path (no leading `/`, no `..` — see [§8](#8-reading-and-writing)) or absolute URI. |
+| `sha256` | string | OPTIONAL integrity hash of the referenced asset. |
+| `format` | string | For `plugin`: `vst3` \| `au` \| `lv2` \| `clap` \| … (open). |
+| `id` | string | For `plugin`: bundle/unique id; for `builtin`: the host DSP id. |
+| `name`, `vendor`, `preset` | string | OPTIONAL plugin identity/preset hints. |
+| `state` | string (base64) | OPTIONAL opaque plugin state for exact recall. MUST NOT be the only representation — pair with `intent`/`params` so a Reader without that plugin can still render something. |
+| `params` | object | Same shape as block `params`; realization-specific control values. |
+
+**Conformance.**
+
+- A Writer **SHOULD** give every block an `intent` even when it also emits a `state` blob, so the
+  rig stays renderable by Readers that lack the exact plugin/capture.
+- A Reader that renders rigs **SHOULD** select, per block, the first `realizations[]` entry whose
+  `engine` it supports; if none match, it **MAY** synthesize from `intent`/`params` or skip the
+  block, and **MUST NOT** fail the whole pack.
+- A Reader that does not interpret rigs **MUST** ignore `rigs.json` and preserve it verbatim on
+  round-trip, along with any unknown `role`/`engine`/`kind` values and `ext` namespaces.
 
 ---
 

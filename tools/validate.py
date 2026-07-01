@@ -64,6 +64,7 @@ SIDE_FILE_SCHEMAS = {
     "vocal_pitch_contour": "vocal-pitch-contour.schema.json",
     "keys": "keys.schema.json",
     "harmony": "harmony.schema.json",
+    "rigs": "rigs.schema.json",
 }
 NON_JSON_POINTERS = ("cover", "preview")
 
