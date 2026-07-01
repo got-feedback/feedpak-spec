@@ -10,7 +10,7 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 - **Specification version:** 1.12.0
 - **Format major version:** 1
 - **Status:** Draft
-- **Date:** 2026-06-23
+- **Date:** 2026-07-01
 - **Editors:** The feedpak authors
 - **License:** [CC0 1.0 Universal](../LICENSE) (this document)
 - **Machine-readable schemas:** [`schemas/`](../schemas/) (MIT)
@@ -175,7 +175,9 @@ feedpak_version: "1.12.0"
   [`language`](#51-top-level-keys), the per-stem [`language`](#53-stems) hint, and the
   [`lyric_tracks`](#55-lyric_tracks) list (original / transliteration / translation lyric tracks) —
   all additive, an older Reader ignores them and still loads the single [`lyrics`](#71-lyricsjson)
-  pointer as before.)
+  pointer as before. 1.12.0 adds the optional album-grouping / genre keys —
+  [`album_artist`](#51-top-level-keys), [`track`](#51-top-level-keys), [`disc`](#51-top-level-keys),
+  and [`genres`](#51-top-level-keys) — all additive, an older Reader ignores them.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
