@@ -806,7 +806,7 @@ when the source carries no tone data.
     {"t": 48.0, "name": "Clean Rhythm"}
   ],
   "definitions": [
-    {"Name": "Clean Rhythm", "Key": "Tone_A", "GearList": { /* raw gear blocks */ }}
+    {"name": "Clean Rhythm", "id": "tone-1", "gear": { /* opaque, source-specific gear data */ }}
   ]
 }
 ```
