@@ -16,6 +16,10 @@
     "artist": { "type": "string" },
     "album": { "type": "string" },
     "year": { "type": "integer" },
+    "album_artist": { "type": "string" },
+    "track": { "type": "integer", "minimum": 1 },
+    "disc": { "type": "integer", "minimum": 1 },
+    "genres": { "type": "array", "items": { "type": "string" } },
     "language": { "$ref": "#/$defs/bcp47" },
     "authors": {
       "type": "array",

@@ -10,6 +10,22 @@ relate.
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-07-01
+
+Additive (MINOR) release: album-grouping and genre metadata. Backward-compatible — a 1.0.0
+(or 1.11.0) pack is also a valid 1.12.0 pack, and an older reader ignores the new optional keys.
+
+### Added
+- **Album grouping + genre metadata** ([spec §5.1](spec/feedpak-v1.md#51-top-level-keys)):
+  four OPTIONAL, author-set top-level keys —
+  - **`album_artist`** (string) — album artist for the release, so multi-artist / compilation
+    albums group under one album identity; absent ⇒ falls back to `artist`.
+  - **`track`** (int, 1-based) — track number within the album, for album playback order.
+  - **`disc`** (int, 1-based, default 1) — disc number for multi-disc releases.
+  - **`genres`** (list of strings, most specific first; `genres[0]` is primary) — genre labels.
+
+  A reader predating 1.12.0 ignores all four.
+
 ## [1.11.0] - 2026-06-23
 
 Additive (MINOR) release: multi-lingual lyric tracks, language tags, and language-tagged vocal

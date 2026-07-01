@@ -7,10 +7,10 @@ The JSON Schemas, examples, and reference code that accompany it are MIT-license
 
 # feedpak Format Specification
 
-- **Specification version:** 1.11.0
+- **Specification version:** 1.12.0
 - **Format major version:** 1
 - **Status:** Draft
-- **Date:** 2026-06-23
+- **Date:** 2026-07-01
 - **Editors:** The feedpak authors
 - **License:** [CC0 1.0 Universal](../LICENSE) (this document)
 - **Machine-readable schemas:** [`schemas/`](../schemas/) (MIT)
@@ -147,11 +147,11 @@ The manifest **SHOULD** carry a top-level `feedpak_version` key whose value is a
 which version of *this format* the package conforms to.
 
 ```yaml
-feedpak_version: "1.11.0"
+feedpak_version: "1.12.0"
 ```
 
 - A Writer producing a feedpak that conforms to this document **SHOULD** set
-  `feedpak_version: "1.11.0"`. (The optional fields added since 1.0.0 —
+  `feedpak_version: "1.12.0"`. (The optional fields added since 1.0.0 —
   [`authors`](#54-authors) in 1.1.0; the song-level [`tempos`](#74-song_timelinejson) /
   [`time_signatures`](#74-song_timelinejson) plus the per-arrangement
   [`tempos`](#610-per-arrangement-tempo-optional) override in 1.2.0; the per-note bend shape
@@ -175,7 +175,9 @@ feedpak_version: "1.11.0"
   [`language`](#51-top-level-keys), the per-stem [`language`](#53-stems) hint, and the
   [`lyric_tracks`](#55-lyric_tracks) list (original / transliteration / translation lyric tracks) —
   all additive, an older Reader ignores them and still loads the single [`lyrics`](#71-lyricsjson)
-  pointer as before.)
+  pointer as before. 1.12.0 adds the optional album-grouping / genre keys —
+  [`album_artist`](#51-top-level-keys), [`track`](#51-top-level-keys), [`disc`](#51-top-level-keys),
+  and [`genres`](#51-top-level-keys) — all additive, an older Reader ignores them.)
 - If `feedpak_version` is **absent**, a Reader **MUST** treat the package as `"1.0.0"`. (This
   makes every package authored before the field existed a valid 1.0.0 package.)
 - The value **MUST** be a valid semver string when present. A Reader **MUST** reject a value
@@ -292,7 +294,11 @@ stems:
 | `title` | string | **yes** | Song title. |
 | `artist` | string | **yes** | Artist name. |
 | `album` | string | no | Album. |
+| `album_artist` | string | no | Album artist for the release. Used to group multi-artist / **compilation** albums under one album identity. Absent ⇒ falls back to `artist`. |
 | `year` | int | no | Release year. |
+| `track` | int | no | 1-based track number within the album, for album playback order. Absent ⇒ order is unspecified (a consumer MAY fall back to a filename/title heuristic or the user's own ordering). |
+| `disc` | int | no | 1-based disc number for a multi-disc release. Absent ⇒ `1`. |
+| `genres` | list | no | Zero or more genre labels (strings), most specific first; a consumer treats `genres[0]` as the primary genre. Free-form, but authors SHOULD prefer common, normalized names. Absent ⇒ unspecified. |
 | `language` | string | no | [BCP 47](https://www.rfc-editor.org/info/bcp47) tag for the song's **primary sung language** (e.g. `en`, `ja`, `ko`, `zh-Hans`). Absent ⇒ unspecified (treat as `und`). See [§5.5](#55-lyric_tracks). |
 | `authors` | list | no | Human contributors who authored or edited this feedpak (see [§5.4](#54-authors)). Distinct from `artist`. |
 | `duration` | number | **yes** | Song length in seconds. |

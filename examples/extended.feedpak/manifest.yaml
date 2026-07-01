@@ -1,11 +1,17 @@
 # Extended feedpak exercising optional side-files: lyrics, vocal pitch,
 # song timeline, and a drum tab. See spec/feedpak-v1.md §5 and §7.
 # SPDX-License-Identifier: MIT
-feedpak_version: "1.11.0"
+feedpak_version: "1.12.0"
 title: "Extended Demo"
 artist: "Example Artist"
 album: "Spec Examples"
+album_artist: "Various Artists"   # groups a compilation under one album identity (§5.1)
 year: 2026
+track: 3                          # 1-based album track number, for album playback order (§5.1)
+disc: 1
+genres:                           # most specific first; genres[0] is the primary genre (§5.1)
+  - "Progressive Metal"
+  - "Metal"
 language: en           # BCP 47 — the song's primary sung language (§5.1)
 authors:
   - name: Jane Smith
